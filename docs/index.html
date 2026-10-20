@@ -1,0 +1,768 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NotchWave</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one big MacBook lid as the hero, the live notch at its top edge; a control strip under it; then a quiet single column explaining the build. */
+:root {
+  --bg: #e9ecf0;          /* anodised aluminium, slight blue cast */
+  --surface: #f6f7f9;
+  --line: #cfd4dc;
+  --fg: #16181d;          /* graphite */
+  --muted: #5b6270;
+  --accent: #0c6f78;      /* the bass colour of the waveform, deepened for text */
+  --accent-ink: #ffffff;
+  --code-bg: #dfe3e9;
+  --bezel: #0a0a0c;
+  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317; --surface: #191c22; --line: #2b303a; --fg: #e8eaee; --muted: #9aa1ad;
+    --accent: #62d3cc; --accent-ink: #06201f; --code-bg: #1f232b; --bezel: #000000; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317; --surface: #191c22; --line: #2b303a; --fg: #e8eaee; --muted: #9aa1ad;
+  --accent: #62d3cc; --accent-ink: #06201f; --code-bg: #1f232b; --bezel: #000000; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.01em; }
+.top nav { display: flex; gap: 18px; font-size: 0.92rem; }
+.top nav a { color: var(--muted); text-decoration: none; }
+.top nav a:hover { color: var(--fg); }
+
+.intro { display: flex; flex-direction: column; gap: 10px; max-width: 62ch; }
+.intro h1 {
+  font-family: var(--display); font-weight: 600; font-size: clamp(2rem, 5.2vw, 3.6rem);
+  line-height: 1.02; letter-spacing: -0.03em; margin: 0; text-wrap: balance;
+}
+.intro p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+
+/* ---------- The MacBook ---------- */
+.laptop { width: 100%; }
+.lid {
+  background: var(--bezel);
+  border-radius: 22px 22px 6px 6px;
+  padding: clamp(6px, 1.2vw, 12px) clamp(6px, 1.2vw, 12px) clamp(14px, 2.4vw, 24px);
+  box-shadow: 0 0 0 1px #2a2c31, 0 30px 60px -30px rgba(10, 20, 40, 0.45);
+}
+.display {
+  position: relative; overflow: hidden; border-radius: 12px 12px 2px 2px;
+  aspect-ratio: 16 / 8.4; max-width: 100%;
+  background: #0d1424;
+}
+.zoomer { position: absolute; inset: 0; transform-origin: 50% 0; transition: transform 0.6s cubic-bezier(.2,.8,.2,1); }
+@media (prefers-reduced-motion: reduce) { .zoomer { transition: none; } }
+.wallpaper {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 50% at 18% 88%, rgba(255, 168, 120, 0.55), transparent 70%),
+    radial-gradient(55% 60% at 85% 75%, rgba(84, 210, 200, 0.35), transparent 70%),
+    radial-gradient(70% 60% at 50% 10%, rgba(70, 70, 150, 0.6), transparent 70%),
+    linear-gradient(180deg, #121a33 0%, #28305c 42%, #6b4a72 72%, #c98476 100%);
+}
+.wallpaper::after { /* faint horizon line, like water */
+  content: ""; position: absolute; left: 0; right: 0; top: 68%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+}
+.menubar {
+  position: absolute; left: 0; right: 0; top: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  color: rgba(255,255,255,0.92);
+  background: rgba(10, 14, 28, 0.28);
+  backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", var(--body);
+  white-space: nowrap;
+}
+.menubar .left, .menubar .right { display: flex; align-items: center; }
+.menubar .app { font-weight: 700; }
+.menubar svg { display: block; }
+.notch-canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
+.screen-chip {
+  position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%);
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: rgba(255,255,255,0.78); background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.14);
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+.base {
+  height: clamp(8px, 1.4vw, 14px); margin: 0 -2.5%;
+  background: linear-gradient(180deg, #d5d8de, #a9aeb7 70%, #7f848d);
+  border-radius: 0 0 14px 14px / 0 0 10px 10px; position: relative;
+}
+.base::before { /* the thumb scoop */
+  content: ""; position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+  width: 14%; height: 45%; background: #9aa0a9; border-radius: 0 0 8px 8px;
+}
+
+/* ---------- Controls ---------- */
+.controls {
+  display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px 28px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 18px 20px;
+}
+.group { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.group-label { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .seg label.btn {
+  font: 500 0.9rem var(--body); color: var(--fg);
+  background: transparent; border: 1px solid var(--line); border-radius: 8px;
+  padding: 7px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+}
+.seg button:hover, .seg label.btn:hover { border-color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.seg label.btn input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.status { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; font-size: 0.92rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+.status strong { color: var(--fg); font-weight: 600; }
+.meter { flex: 0 0 120px; height: 6px; border-radius: 3px; background: var(--code-bg); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0%; background: var(--accent); transition: width 0.08s linear; }
+.status .msg { flex-basis: 100%; color: var(--fg); }
+.status .msg:empty { display: none; }
+
+/* ---------- Write-up ---------- */
+main.story { display: flex; flex-direction: column; gap: 40px; margin-top: 8px; }
+section { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 8px 40px; }
+section h2 { font-family: var(--display); font-weight: 600; font-size: 1.35rem; letter-spacing: -0.015em; margin: 0; line-height: 1.2; text-wrap: balance; }
+section .body { display: flex; flex-direction: column; gap: 14px; max-width: 66ch; min-width: 0; }
+section p { margin: 0; }
+.pipeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.pipeline li { padding: 16px; display: flex; flex-direction: column; gap: 6px; background: var(--surface); min-width: 0; }
+.pipeline li + li { border-left: 1px solid var(--line); }
+.pipeline .step { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.pipeline h3 { margin: 0; font-family: var(--display); font-size: 1.1rem; font-weight: 600; }
+.pipeline p { font-size: 0.93rem; color: var(--muted); }
+.pipeline code, .body code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.mapping { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.mapping figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.mapping figcaption { font-size: 0.88rem; color: var(--muted); }
+.mapping svg { width: 100%; height: auto; display: block; border-radius: 10px; background: #0b0d12; }
+.codeblock { position: relative; background: var(--code-bg); border-radius: 10px; overflow-x: auto; }
+.codeblock pre { margin: 0; padding: 16px 18px; font-family: var(--mono); font-size: 0.88rem; line-height: 1.7; }
+.copy { position: absolute; top: 8px; right: 8px; font: 500 0.8rem var(--body); background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.facts { display: grid; grid-template-columns: max-content minmax(0,1fr); gap: 6px 18px; margin: 0; font-size: 0.95rem; }
+.facts dt { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); padding-top: 2px; }
+.facts dd { margin: 0; }
+footer { border-top: 1px solid var(--line); padding-top: 18px; color: var(--muted); font-size: 0.9rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+
+@media (max-width: 760px) {
+  .controls { grid-template-columns: 1fr; }
+  section { grid-template-columns: 1fr; }
+  .pipeline { grid-template-columns: 1fr; }
+  .pipeline li + li { border-left: 0; border-top: 1px solid var(--line); }
+  .mapping { grid-template-columns: 1fr; }
+}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">NotchWave</div>
+    <nav aria-label="Page sections">
+      <a href="#how">How it works</a>
+      <a href="#run">Run it</a>
+      <a href="https://github.com/atharvabankarsound/notch-audio-visualizer">Source</a>
+    </nav>
+  </header>
+
+  <div class="intro">
+    <h1>Your Mac’s notch, listening.</h1>
+    <p>A live audio waveform that grows out of the MacBook notch, from the microphone, everything your Mac is playing, or a single app. This page runs the same visualiser in your browser.</p>
+  </div>
+
+  <div class="laptop" aria-label="Simulated MacBook screen showing the notch visualiser">
+    <div class="lid">
+      <div class="display" id="display">
+        <div class="zoomer" id="zoomer">
+          <div class="wallpaper"></div>
+          <div class="menubar" id="menubar">
+            <div class="left" id="mbLeft">
+              <span class="glyph" aria-hidden="true">
+                <svg id="logoGlyph" viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.6 8h1.3l1-2.4 1.6 4.8 1-2.4h1.9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="app">Music</span><span>File</span><span>Edit</span><span>Song</span><span>View</span><span>Window</span>
+            </div>
+            <div class="right" id="mbRight">
+              <span aria-hidden="true"><svg viewBox="0 0 16 16" width="15" height="15"><path d="M2 9h1.6M5 6v6M8 3.5v9M11 6v6M14 9h-1.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+              <span aria-hidden="true"><svg viewBox="0 0 24 16" width="22" height="15"><rect x="1" y="3" width="19" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="5" width="13" height="6" rx="1.5" fill="currentColor"/><rect x="21" y="6.2" width="1.6" height="3.6" rx=".8" fill="currentColor"/></svg></span>
+              <span aria-hidden="true"><svg viewBox="0 0 16 16" width="15" height="15"><path d="M1.8 6.2a9 9 0 0 1 12.4 0M4 8.6a5.8 5.8 0 0 1 8 0M6.2 11a2.6 2.6 0 0 1 3.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+              <span id="clock">Wed 21 Oct 00:31</span>
+            </div>
+          </div>
+          <canvas class="notch-canvas" id="notch"></canvas>
+          <div class="screen-chip" id="chip">Preview · press Play demo to hear it</div>
+        </div>
+      </div>
+    </div>
+    <div class="base" aria-hidden="true"></div>
+  </div>
+
+  <div class="controls">
+    <div class="group">
+      <span class="group-label" id="srcLabel">Listen to</span>
+      <div class="seg" role="group" aria-labelledby="srcLabel">
+        <button id="btnDemo" aria-pressed="false">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>Play demo
+        </button>
+        <label class="btn" for="fileInput">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Upload a track
+          <input type="file" id="fileInput" accept="audio/*">
+        </label>
+        <button id="btnMic" aria-pressed="false">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5" fill="currentColor"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Microphone
+        </button>
+        <button id="btnTab" aria-pressed="false">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 6h13" stroke="currentColor" stroke-width="1.5"/></svg>Browser tab audio
+        </button>
+        <button id="btnStop" aria-pressed="false">Stop</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="group-label" id="styleLabel">Style</span>
+      <div class="seg" role="group" aria-labelledby="styleLabel" id="styleSeg">
+        <button data-style="aurora" aria-pressed="true">Aurora</button>
+        <button data-style="mono" aria-pressed="false">Mono</button>
+        <button data-style="accent" aria-pressed="false">System Accent</button>
+      </div>
+      <span class="group-label" id="viewLabel">View</span>
+      <div class="seg" role="group" aria-labelledby="viewLabel">
+        <button id="btnZoom" aria-pressed="false">Close-up on the notch</button>
+        <button id="btnSens" aria-pressed="false">Sensitivity: Normal</button>
+      </div>
+    </div>
+    <div class="status" aria-live="polite">
+      <span>Source: <strong id="srcName">Preview animation</strong></span>
+      <span class="meter" aria-hidden="true"><i id="meterFill"></i></span>
+      <span class="msg" id="msg"></span>
+    </div>
+  </div>
+
+  <main class="story">
+    <section id="how">
+      <h2>It sits around the notch, not in it</h2>
+      <div class="body">
+        <p>The notch is part of the hardware, so no app can draw inside it. NotchWave draws a black shape that continues the notch’s own outline: flat against the top of the screen, with the same rounded lower corners. At rest it lines up exactly with the real notch and disappears. When sound starts it widens on a spring, and when the sound stops it settles back after a short pause so it doesn’t flicker between songs.</p>
+        <p>The size comes from macOS itself (the screen’s safe-area inset and the two usable menu bar areas either side), so it fits every notched MacBook. On a display without a notch it grows a virtual one out of nothing while audio plays.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>From the vinyl to the notch</h2>
+      <div class="body">
+        <p>This follows on from my Max/MSP and Jitter <a href="https://github.com/atharvabankarsound/vinyl-audio-visualizer">rotating-vinyl visualiser</a>, which put low frequencies at the centre of the record and highs at the rim. NotchWave keeps that mapping and unrolls it along the menu bar: bass sits next to the notch and treble reaches out to the tips, mirrored on both sides.</p>
+        <div class="mapping">
+          <figure>
+            <svg viewBox="0 0 240 150" role="img" aria-label="Vinyl: low frequencies at the centre, high frequencies at the rim">
+              <circle cx="120" cy="75" r="62" fill="#14161c" stroke="#2c3038"/>
+              <circle cx="120" cy="75" r="50" fill="none" stroke="#f08fd3" stroke-opacity=".55" stroke-width="5"/>
+              <circle cx="120" cy="75" r="38" fill="none" stroke="#a49bff" stroke-opacity=".6" stroke-width="5"/>
+              <circle cx="120" cy="75" r="26" fill="none" stroke="#62d3e4" stroke-opacity=".75" stroke-width="5"/>
+              <circle cx="120" cy="75" r="6" fill="#0b0d12" stroke="#2c3038"/>
+              <text x="120" y="146" fill="#9aa1ad" font-size="10" text-anchor="middle" font-family="IBM Plex Mono, monospace">LOW → CENTRE · HIGH → RIM</text>
+            </svg>
+            <figcaption>The Max/MSP patch: frequency becomes distance from the centre of the record.</figcaption>
+          </figure>
+          <figure>
+            <svg viewBox="0 0 240 150" role="img" aria-label="Notch: low frequencies beside the notch, high frequencies at the outer tips">
+              <rect x="0" y="0" width="240" height="22" fill="#1c2138"/>
+              <path d="M24 0 Q28 0 28 4 V24 Q28 32 36 32 H204 Q212 32 212 24 V4 Q212 0 216 0 Z" fill="#000"/>
+              <g fill="#62d3e4"><rect x="81" y="8" width="2.4" height="9" rx="1.2"/><rect x="155" y="8" width="2.4" height="9" rx="1.2"/></g>
+              <g fill="#a49bff"><rect x="66" y="10" width="2.4" height="6" rx="1.2"/><rect x="170" y="10" width="2.4" height="6" rx="1.2"/></g>
+              <g fill="#f08fd3"><rect x="48" y="11" width="2.4" height="3.5" rx="1.2"/><rect x="188" y="11" width="2.4" height="3.5" rx="1.2"/></g>
+              <rect x="88" y="0" width="64" height="20" rx="6" fill="#000"/>
+              <text x="120" y="62" fill="#9aa1ad" font-size="10" text-anchor="middle" font-family="IBM Plex Mono, monospace">HIGH ← LOW · NOTCH · LOW → HIGH</text>
+              <text x="120" y="146" fill="#9aa1ad" font-size="10" text-anchor="middle" font-family="IBM Plex Mono, monospace">24 BANDS · 40 Hz – 16 kHz</text>
+            </svg>
+            <figcaption>NotchWave: frequency becomes distance from the notch, mirrored left and right.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Three stages, all on your Mac</h2>
+      <div class="body">
+        <ol class="pipeline">
+          <li><span class="step">1 · Capture</span><h3>Hear the Mac</h3><p><code>AVAudioEngine</code> for the microphone. <code>ScreenCaptureKit</code> for everything the Mac plays, or one app on its own.</p></li>
+          <li><span class="step">2 · Analyse</span><h3>Split the sound</h3><p>A 2048-point FFT with Apple’s Accelerate framework, about 94 times a second, folded into 24 log-spaced bands.</p></li>
+          <li><span class="step">3 · Draw</span><h3>Move like macOS</h3><p>A SwiftUI <code>Canvas</code> redrawn every display frame, with spring physics for the shape and fast-attack, slow-release bars.</p></li>
+        </ol>
+        <p>Nothing is recorded or uploaded. Audio is analysed in memory and thrown away a few milliseconds later.</p>
+      </div>
+    </section>
+
+    <section id="run">
+      <h2>Run it on your Mac</h2>
+      <div class="body">
+        <dl class="facts">
+          <dt>Needs</dt><dd>A Mac on macOS 14 Sonoma or later, and Xcode 15 or later (or its command line tools).</dd>
+          <dt>Works on</dt><dd>Every notched MacBook Air and MacBook Pro. Other displays get a virtual notch.</dd>
+          <dt>Permissions</dt><dd>Microphone, and Screen &amp; System Audio Recording for computer or app audio. macOS asks the first time.</dd>
+        </dl>
+        <div class="codeblock">
+          <button class="copy" id="copyBtn" type="button">Copy</button>
+          <pre id="cmds">git clone https://github.com/atharvabankarsound/notch-audio-visualizer.git
+cd notch-audio-visualizer
+./scripts/build-app.sh
+open build/NotchWave.app</pre>
+        </div>
+        <p>A waveform icon appears in the menu bar. Use it to switch between All Computer Audio, Microphone or a single app, change the style, or quit. To work on the code, open <code>Package.swift</code> in Xcode and press Run.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>NotchWave by Atharva Bankar</span>
+    <a href="https://github.com/atharvabankarsound/notch-audio-visualizer">github.com/atharvabankarsound/notch-audio-visualizer</a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  // ---------- Notch geometry, in macOS points (14-inch MacBook Pro) ----------
+  const NOTCH_W = 185, NOTCH_H = 32;
+  const MAX_WING = 112, MAX_DROP = 10, EAR = 6, PAD = 4;
+  const VIRTUAL_SCREEN_W = 1200;   // a little closer than real life so the notch reads clearly
+  const BANDS = 24, WAVE = 96;
+
+  const display = document.getElementById('display');
+  const zoomer = document.getElementById('zoomer');
+  const canvas = document.getElementById('notch');
+  const g = canvas.getContext('2d');
+  const menubar = document.getElementById('menubar');
+  const chip = document.getElementById('chip');
+  const meterFill = document.getElementById('meterFill');
+  const srcName = document.getElementById('srcName');
+  const msg = document.getElementById('msg');
+
+  const settings = { style: 'aurora', sensIndex: 1, zoom: 1 };
+  const SENS = [{ name: 'Low', db: -6 }, { name: 'Normal', db: 0 }, { name: 'High', db: 9 }];
+
+  let scale = 1;            // CSS px per macOS point
+  let dpr = 1;
+
+  function layout() {
+    const w = display.clientWidth;
+    scale = Math.max(w / VIRTUAL_SCREEN_W, 0.36);
+    dpr = Math.min(window.devicePixelRatio || 1, 3) * settings.zoom;
+    const mbH = NOTCH_H * scale;
+    menubar.style.height = mbH + 'px';
+    menubar.style.fontSize = (13 * scale) + 'px';
+    const gap = Math.max(14 * scale, 5);
+    for (const el of menubar.querySelectorAll('.left > *, .right > *')) { el.style.marginRight = gap + 'px'; }
+    menubar.querySelector('.left').style.paddingLeft = (16 * scale) + 'px';
+    menubar.querySelector('.right').style.paddingRight = (4 * scale) + 'px';
+    for (const s of menubar.querySelectorAll('svg')) {
+      const base = Number(s.getAttribute('width')) || 15;
+      s.style.width = (base * scale) + 'px'; s.style.height = (15 * scale) + 'px';
+    }
+    // hide left menus that would collide with the wing on narrow screens
+    const leftLimit = w / 2 - (NOTCH_W / 2 + MAX_WING + EAR + 8) * scale;
+    for (const el of menubar.querySelectorAll('.left > span')) {
+      el.style.visibility = 'visible';
+      if (el.offsetLeft + el.offsetWidth > leftLimit) el.style.visibility = 'hidden';
+    }
+    const rightLimit = w / 2 + (NOTCH_W / 2 + MAX_WING + EAR + 8) * scale;
+    for (const el of menubar.querySelectorAll('.right > span')) {
+      el.style.visibility = el.offsetLeft < rightLimit ? 'hidden' : 'visible';
+    }
+    const cssW = w;
+    const cssH = (NOTCH_H + MAX_DROP + PAD) * scale;
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+  }
+  new ResizeObserver(layout).observe(display);
+
+  // ---------- Clock ----------
+  const clock = document.getElementById('clock');
+  function tickClock() {
+    const d = new Date();
+    const day = d.toLocaleDateString('en-GB', { weekday: 'short' });
+    const date = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    clock.textContent = `${day} ${date} ${time}`;
+  }
+  tickClock(); setInterval(tickClock, 15000);
+
+  // ---------- Audio ----------
+  let ac = null, analyser = null, freq = null, timeData = null;
+  let current = null;        // { name, stop() }
+
+  function ensureAudio() {
+    if (!ac) {
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = ac.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0;     // smoothing happens in the renderer, like the Mac app
+      freq = new Float32Array(analyser.frequencyBinCount);
+      timeData = new Float32Array(analyser.fftSize);
+    }
+    if (ac.state === 'suspended') ac.resume();
+  }
+
+  function setPressed(id) {
+    for (const b of ['btnDemo', 'btnMic', 'btnTab']) document.getElementById(b).setAttribute('aria-pressed', String(b === id));
+  }
+  function say(text) { msg.textContent = text || ''; }
+
+  function stopSource() {
+    if (current) { try { current.stop(); } catch (e) {} }
+    current = null;
+    setPressed(null);
+    srcName.textContent = 'Nothing (stopped)';
+    chip.textContent = 'Stopped · watch the notch settle back';
+    chip.hidden = false;
+  }
+
+  function begin(name, btnId, stop) {
+    current = { name, stop };
+    setPressed(btnId);
+    srcName.textContent = name;
+    chip.hidden = true;
+    say('');
+  }
+
+  // A small original loop so the demo works without any permissions.
+  function startDemo() {
+    ensureAudio(); stopSource();
+    const out = ac.createGain(); out.gain.value = 0.55;
+    out.connect(analyser); out.connect(ac.destination);
+    const noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+    const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+    const bpm = 108, step16 = 60 / bpm / 4;
+    const chords = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];  // Am F C G
+    const bassLine = [45, 0, 45, 57, 0, 45, 52, 0, 45, 0, 57, 45, 0, 55, 52, 0];
+    let stepIndex = 0, nextTime = ac.currentTime + 0.08;
+
+    function env(gainNode, t, peak, attack, decay) {
+      gainNode.gain.setValueAtTime(0.0001, t);
+      gainNode.gain.exponentialRampToValueAtTime(peak, t + attack);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, t + attack + decay);
+    }
+    function kick(t) {
+      const o = ac.createOscillator(), v = ac.createGain();
+      o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.13);
+      env(v, t, 0.9, 0.003, 0.32); o.connect(v).connect(out); o.start(t); o.stop(t + 0.4);
+    }
+    function noise(t, type, f, peak, decay) {
+      const s = ac.createBufferSource(); s.buffer = noiseBuf;
+      const fl = ac.createBiquadFilter(); fl.type = type; fl.frequency.value = f;
+      const v = ac.createGain(); env(v, t, peak, 0.002, decay);
+      s.connect(fl).connect(v).connect(out); s.start(t, Math.random() * 0.5); s.stop(t + decay + 0.05);
+    }
+    function bass(t, m) {
+      const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m);
+      const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.Q.value = 5;
+      fl.frequency.setValueAtTime(900, t); fl.frequency.exponentialRampToValueAtTime(180, t + 0.2);
+      const v = ac.createGain(); env(v, t, 0.32, 0.005, 0.22);
+      o.connect(fl).connect(v).connect(out); o.start(t); o.stop(t + 0.3);
+    }
+    function pad(t, notes, dur) {
+      for (const m of notes) for (const det of [-8, 8]) {
+        const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m + 12); o.detune.value = det;
+        const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = 1500;
+        const v = ac.createGain();
+        v.gain.setValueAtTime(0.0001, t); v.gain.exponentialRampToValueAtTime(0.03, t + 0.5);
+        v.gain.setValueAtTime(0.03, t + dur - 0.4); v.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(fl).connect(v).connect(out); o.start(t); o.stop(t + dur + 0.05);
+      }
+    }
+    function pluck(t, m) {
+      const o = ac.createOscillator(); o.type = 'triangle'; o.frequency.value = mtof(m);
+      const v = ac.createGain(); env(v, t, 0.13, 0.004, 0.2);
+      o.connect(v).connect(out); o.start(t); o.stop(t + 0.3);
+    }
+    function schedule() {
+      while (nextTime < ac.currentTime + 0.12) {
+        const s = stepIndex % 16, bar = Math.floor(stepIndex / 16) % 4;
+        if (s % 4 === 0) kick(nextTime);
+        if (s === 4 || s === 12) noise(nextTime, 'bandpass', 1800, 0.5, 0.16);
+        if (s % 2 === 1) noise(nextTime, 'highpass', 7500, s % 4 === 3 ? 0.22 : 0.12, s % 4 === 3 ? 0.14 : 0.05);
+        if (bassLine[s]) bass(nextTime, bassLine[s] + (bar === 1 ? -4 : bar === 2 ? -9 : bar === 3 ? -2 : 0));
+        if (s === 0) pad(nextTime, chords[bar], step16 * 16);
+        if (s % 2 === 0 && Math.random() < 0.7) {
+          const c = chords[bar]; pluck(nextTime, c[Math.floor(Math.random() * 3)] + 24);
+        }
+        nextTime += step16; stepIndex++;
+      }
+    }
+    schedule();
+    const timer = setInterval(schedule, 25);
+    begin('Demo loop', 'btnDemo', () => {
+      clearInterval(timer);
+      out.gain.setTargetAtTime(0.0001, ac.currentTime, 0.05);
+      setTimeout(() => out.disconnect(), 400);
+    });
+  }
+
+  function startFile(file) {
+    ensureAudio(); stopSource();
+    const url = URL.createObjectURL(file);
+    const el = new Audio(); el.src = url; el.crossOrigin = 'anonymous';
+    const node = ac.createMediaElementSource(el);
+    node.connect(analyser); node.connect(ac.destination);
+    el.play().catch(() => say('The track could not play. Try an MP3, AAC, WAV or FLAC file.'));
+    el.addEventListener('ended', () => { if (current && current.el === el) stopSource(); });
+    begin(file.name, null, () => { el.pause(); node.disconnect(); URL.revokeObjectURL(url); });
+    current.el = el;
+  }
+
+  async function startMic() {
+    ensureAudio();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+      stopSource();
+      const node = ac.createMediaStreamSource(stream);
+      node.connect(analyser);                 // not to the speakers: no feedback
+      begin('Microphone', 'btnMic', () => { node.disconnect(); stream.getTracks().forEach(t => t.stop()); });
+    } catch (e) {
+      say('This page can’t reach your microphone here. It works on the GitHub Pages version of the site, or try the demo loop or upload a track.');
+    }
+  }
+
+  async function startTab() {
+    ensureAudio();
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      if (!stream.getAudioTracks().length) {
+        stream.getTracks().forEach(t => t.stop());
+        say('No audio came through. Pick a browser tab and turn on “Share tab audio” in the sharing dialog.');
+        return;
+      }
+      stopSource();
+      const node = ac.createMediaStreamSource(new MediaStream(stream.getAudioTracks()));
+      node.connect(analyser);
+      stream.getTracks().forEach(t => t.addEventListener('ended', () => { if (current && current.stream === stream) stopSource(); }));
+      begin('Browser tab', 'btnTab', () => { node.disconnect(); stream.getTracks().forEach(t => t.stop()); });
+      current.stream = stream;
+    } catch (e) {
+      say('Tab audio isn’t available here. It works in Chrome or Edge on the GitHub Pages version of the site. The Mac app captures any app directly.');
+    }
+  }
+
+  document.getElementById('btnDemo').addEventListener('click', startDemo);
+  document.getElementById('btnMic').addEventListener('click', startMic);
+  document.getElementById('btnTab').addEventListener('click', startTab);
+  document.getElementById('btnStop').addEventListener('click', stopSource);
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) startFile(f);
+    e.target.value = '';
+  });
+
+  for (const b of document.querySelectorAll('#styleSeg button')) {
+    b.addEventListener('click', () => {
+      settings.style = b.dataset.style;
+      for (const o of document.querySelectorAll('#styleSeg button')) o.setAttribute('aria-pressed', String(o === b));
+    });
+  }
+  const btnZoom = document.getElementById('btnZoom');
+  btnZoom.addEventListener('click', () => {
+    settings.zoom = settings.zoom === 1 ? 2.4 : 1;
+    btnZoom.setAttribute('aria-pressed', String(settings.zoom !== 1));
+    zoomer.style.transform = settings.zoom === 1 ? '' : `scale(${settings.zoom})`;
+    layout();
+  });
+  const btnSens = document.getElementById('btnSens');
+  btnSens.addEventListener('click', () => {
+    settings.sensIndex = (settings.sensIndex + 1) % SENS.length;
+    btnSens.textContent = 'Sensitivity: ' + SENS[settings.sensIndex].name;
+  });
+
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', () => {
+    const text = document.getElementById('cmds').textContent;
+    const done = () => { copyBtn.textContent = 'Copied'; setTimeout(() => copyBtn.textContent = 'Copy', 1600); };
+    const fallback = () => {
+      const r = document.createRange(); r.selectNodeContents(document.getElementById('cmds'));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r); copyBtn.textContent = 'Selected';
+    };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+
+  // ---------- Analysis: same band layout as the Swift analyser ----------
+  const snap = { bands: new Float32Array(BANDS), wave: new Float32Array(WAVE), level: 0 };
+
+  function analyseLive() {
+    analyser.getFloatFrequencyData(freq);
+    analyser.getFloatTimeDomainData(timeData);
+    const n = timeData.length;
+    let sum = 0; for (let i = 0; i < n; i++) sum += timeData[i] * timeData[i];
+    snap.level = Math.sqrt(sum / n);
+    const span = 512, stepW = span / WAVE;
+    for (let i = 0; i < WAVE; i++) snap.wave[i] = timeData[n - span + i * stepW];
+
+    const binW = ac.sampleRate / analyser.fftSize, half = freq.length;
+    const minHz = 40, maxHz = 16000;
+    // Web Audio reports ~13.5 dB lower than the Mac analyser's scale, so the window shifts down.
+    const floorDB = -86, ceilDB = -26, tilt = 15, gain = SENS[settings.sensIndex].db;
+    for (let b = 0; b < BANDS; b++) {
+      const t0 = b / BANDS, t1 = (b + 1) / BANDS;
+      let lo = Math.floor(minHz * Math.pow(maxHz / minHz, t0) / binW);
+      let hi = Math.floor(minHz * Math.pow(maxHz / minHz, t1) / binW);
+      lo = Math.max(1, Math.min(lo, half - 1)); hi = Math.max(lo + 1, Math.min(hi, half));
+      let peak = -Infinity; for (let k = lo; k < hi; k++) if (freq[k] > peak) peak = freq[k];
+      const db = peak + tilt * t0 + gain;
+      snap.bands[b] = Math.min(1, Math.max(0, (db - floorDB) / (ceilDB - floorDB)));
+    }
+  }
+
+  // Before anyone presses play: a looping preview (8 s on, 2.5 s quiet) so the page shows what it does.
+  function analysePreview(t) {
+    const cycle = t % 10.5, on = cycle < 8;
+    const beat = Math.pow(Math.max(0, Math.cos((t * 108 / 60) * Math.PI)), 6);
+    for (let b = 0; b < BANDS; b++) {
+      const u = b / (BANDS - 1);
+      const base = 0.62 - 0.32 * u + 0.18 * Math.sin(t * 2.3 + b * 0.55) + 0.1 * Math.sin(t * 5.1 - b * 1.3);
+      const kick = u < 0.25 ? beat * 0.35 : u > 0.7 ? beat * 0.12 : 0;
+      snap.bands[b] = on ? Math.max(0, Math.min(1, base + kick)) : 0;
+    }
+    for (let i = 0; i < WAVE; i++) {
+      snap.wave[i] = on ? 0.18 * Math.sin(i * 0.35 + t * 9) * (0.6 + 0.4 * Math.sin(i * 0.07 + t * 1.7)) + 0.12 * beat * Math.sin(i * 0.12) : 0;
+    }
+    snap.level = on ? 0.1 : 0;
+  }
+
+  // ---------- Renderer: a port of NotchVisualizerView.swift ----------
+  const R = { bands: new Float32Array(BANDS), wave: new Float32Array(WAVE), e: 0, v: 0, last: null, loud: -Infinity };
+
+  function step(now) {
+    const dt = Math.min(Math.max(now - (R.last ?? now), 0), 1 / 30);
+    R.last = now;
+    if (snap.level > 0.0025) R.loud = now;
+    const target = (now - R.loud) < 1.6 ? 1 : 0;
+    const a = 170 * (target - R.e) - 19 * R.v;
+    R.v += a * dt; R.e += R.v * dt;
+    for (let i = 0; i < BANDS; i++) {
+      const goal = snap.bands[i], rate = goal > R.bands[i] ? 30 : 7;
+      R.bands[i] += (goal - R.bands[i]) * (1 - Math.exp(-rate * dt));
+    }
+    for (let i = 0; i < WAVE; i++) R.wave[i] += (snap.wave[i] - R.wave[i]) * (1 - Math.exp(-40 * dt));
+  }
+
+  function hsl(h, l, a) { return `hsla(${h}, 100%, ${l}%, ${a})`; }
+  function barColour(i, value, alpha) {
+    const t = i / (BANDS - 1);
+    if (settings.style === 'mono') return `rgba(255,255,255,${(0.35 + 0.6 * value) * alpha})`;
+    const glow = (0.55 + 0.45 * value) * alpha;
+    if (settings.style === 'accent') return `rgba(10,132,255,${glow})`;
+    return hsl(187 + 137 * t, 69, glow);
+  }
+
+  function radius(e) { return 9 + 3 * Math.min(1, e); }
+
+  function island(x0, x1, bottom, e) {
+    const r = radius(e), k = 0.45;
+    g.beginPath();
+    g.moveTo(x0 - EAR, 0);
+    g.bezierCurveTo(x0 - EAR * k, 0, x0, EAR * (1 - k), x0, EAR);
+    g.lineTo(x0, bottom - r);
+    g.bezierCurveTo(x0, bottom - r * k, x0 + r * k, bottom, x0 + r, bottom);
+    g.lineTo(x1 - r, bottom);
+    g.bezierCurveTo(x1 - r * k, bottom, x1, bottom - r * k, x1, bottom - r);
+    g.lineTo(x1, EAR);
+    g.bezierCurveTo(x1, EAR * (1 - k), x1 + EAR * k, 0, x1 + EAR, 0);
+    g.closePath();
+    g.fillStyle = '#000';
+    g.fill();
+  }
+
+  function pill(x, y, w, h) {
+    const r = w / 2;
+    g.beginPath();
+    if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h);
+    g.fill();
+  }
+
+  function draw() {
+    const W = canvas.width / (scale * dpr);           // canvas width in macOS points
+    g.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+    g.clearRect(0, 0, W, NOTCH_H + MAX_DROP + PAD);
+
+    const e = Math.max(0, R.e), fade = Math.min(1, e);
+    const cx = W / 2, nw = NOTCH_W, nh = NOTCH_H;
+    const wing = MAX_WING * e, drop = MAX_DROP * e;
+    const x0 = cx - nw / 2 - wing, x1 = cx + nw / 2 + wing, bottom = nh + drop;
+
+    island(x0, x1, bottom, e);
+    if (fade < 0.01) return;
+
+    const barW = 2.4, pitch = 4.2, inset = 9, maxH = Math.max(nh - 14, 8), midY = nh / 2;
+    for (let i = 0; i < BANDS; i++) {
+      const d = inset + i * pitch;
+      const reveal = (wing - 8 - d - barW) / 14;
+      if (reveal <= 0) break;
+      const alpha = Math.min(1, reveal) * fade;
+      const value = R.bands[i];
+      const h = Math.max(barW, value * maxH);
+      g.fillStyle = barColour(i, value, alpha);
+      pill(cx - nw / 2 - d - barW, midY - h / 2, barW, h);
+      pill(cx + nw / 2 + d, midY - h / 2, barW, h);
+    }
+
+    if (drop <= 2) return;
+    const r = radius(e), left = x0 + r + 4, right = x1 - r - 4, halfSpan = (right - left) / 2;
+    if (halfSpan <= 4) return;
+    const baseline = nh + drop * 0.5, amp = drop * 0.42;
+    g.beginPath();
+    for (let x = left, first = true; x <= right; x += 1.5) {
+      const u = Math.abs(x - cx) / halfSpan;
+      const idx = Math.min(WAVE - 1, Math.floor(u * (WAVE - 1)));
+      const taper = Math.sin(Math.PI * (1 - Math.min(u, 1)) / 2);
+      const s = Math.max(-1, Math.min(1, R.wave[idx] * 2.5));
+      const y = baseline + s * amp * taper;
+      if (first) { g.moveTo(x, y); first = false; } else g.lineTo(x, y);
+    }
+    const grad = g.createLinearGradient(left, 0, right, 0);
+    const a = 0.85 * fade;
+    if (settings.style === 'aurora') {
+      grad.addColorStop(0, hsl(324, 69, 0)); grad.addColorStop(0.25, hsl(324, 69, a));
+      grad.addColorStop(0.5, hsl(187, 69, a));
+      grad.addColorStop(0.75, hsl(324, 69, a)); grad.addColorStop(1, hsl(324, 69, 0));
+    } else {
+      const c = settings.style === 'mono' ? '255,255,255' : '10,132,255';
+      const aa = settings.style === 'mono' ? a * 0.8 : a;
+      grad.addColorStop(0, `rgba(${c},0)`); grad.addColorStop(0.3, `rgba(${c},${aa})`);
+      grad.addColorStop(0.7, `rgba(${c},${aa})`); grad.addColorStop(1, `rgba(${c},0)`);
+    }
+    g.strokeStyle = grad; g.lineWidth = 1.2; g.lineJoin = 'round';
+    g.stroke();
+  }
+
+  function frame(ms) {
+    const now = ms / 1000;
+    if (current && analyser) analyseLive();
+    else if (!current && srcName.textContent === 'Preview animation') analysePreview(now);
+    else { snap.level = 0; snap.bands.fill(0); snap.wave.fill(0); }
+    step(now);
+    draw();
+    meterFill.style.width = Math.min(100, snap.level * 400) + '%';
+    requestAnimationFrame(frame);
+  }
+
+  layout();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body></html>
