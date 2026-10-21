@@ -33,6 +33,7 @@ enum NotchLayout {
     static let maxWing: CGFloat = 160      // largest "Width" setting; the window is sized for it
     static let maxDrop: CGFloat = 10       // how far it grows below the notch
     static let ear: CGFloat = 6            // concave flare where the shape meets the screen edge
+    static let below: CGFloat = 26         // room under the notch for the Wrap waveform
     static let padding: CGFloat = 4
 }
 
@@ -85,7 +86,7 @@ final class NotchWindowController {
 
         let width = geometry.notchSize.width
             + 2 * (NotchLayout.maxWing + NotchLayout.ear + NotchLayout.padding)
-        let height = geometry.notchSize.height + NotchLayout.maxDrop + NotchLayout.padding
+        let height = geometry.notchSize.height + NotchLayout.below + NotchLayout.padding
         let frame = NSRect(x: screen.frame.midX - width / 2,
                            y: screen.frame.maxY - height,
                            width: width,

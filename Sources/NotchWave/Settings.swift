@@ -15,12 +15,39 @@ enum WaveStyle: String, CaseIterable, Identifiable {
     }
 }
 
+enum WaveShape: String, CaseIterable, Identifiable {
+    case wrap, wave, bars, thread, dots
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .wrap: return "Wrap"
+        case .wave: return "Wave"
+        case .bars: return "Bars"
+        case .thread: return "Thread"
+        case .dots: return "Dots"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .wrap: return "rectangle.topthird.inset.filled"
+        case .wave: return "waveform.path"
+        case .bars: return "chart.bar.fill"
+        case .thread: return "scribble"
+        case .dots: return "circle.grid.3x3.fill"
+        }
+    }
+}
+
 /// User-facing settings, persisted in UserDefaults.
 /// The same controls (and defaults) as the settings window on the demo website.
 final class VisualizerSettings: ObservableObject {
     private static let d = UserDefaults.standard
 
     // Appearance
+    @Published var shape: WaveShape { didSet { Self.d.set(shape.rawValue, forKey: "shape") } }
     @Published var style: WaveStyle { didSet { Self.d.set(style.rawValue, forKey: "style") } }
     /// Line thickness multiplier (0.5 – 3).
     @Published var thickness: Double { didSet { Self.d.set(thickness, forKey: "thickness") } }
@@ -50,6 +77,7 @@ final class VisualizerSettings: ObservableObject {
         func number(_ key: String, _ fallback: Double) -> Double { d.object(forKey: key) == nil ? fallback : d.double(forKey: key) }
         func flag(_ key: String, _ fallback: Bool) -> Bool { d.object(forKey: key) == nil ? fallback : d.bool(forKey: key) }
 
+        shape = WaveShape(rawValue: d.string(forKey: "shape") ?? "") ?? .wrap
         style = WaveStyle(rawValue: d.string(forKey: "style") ?? "") ?? .glass
         thickness = number("thickness", 1)
         height = number("height", 100)
@@ -64,7 +92,7 @@ final class VisualizerSettings: ObservableObject {
     }
 
     func resetToDefaults() {
-        style = .glass; thickness = 1; height = 100; width = 112; glass = 70; glow = 60
+        shape = .wrap; style = .glass; thickness = 1; height = 100; width = 112; glass = 70; glow = 60
         echoLines = true; lipWaveform = true; smoothing = 5; hold = 1.6; sensitivityDB = 0
     }
 

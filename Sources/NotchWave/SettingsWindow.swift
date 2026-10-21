@@ -97,7 +97,11 @@ struct SettingsView: View {
             }
 
             Section("Appearance") {
-                Picker("Style", selection: $settings.style) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Waveform")
+                    ShapePicker(selection: $settings.shape)
+                }
+                Picker("Colour", selection: $settings.style) {
                     ForEach(WaveStyle.allCases) { Text($0.title).tag($0) }
                 }
                 SliderRow(title: "Line thickness", value: $settings.thickness, range: 0.5...3, step: 0.1) { String(format: "%.1f pt", $0) }
@@ -124,6 +128,47 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(minWidth: 440, minHeight: 560)
         .onAppear { input.sync() }
+    }
+}
+
+/// Thumbnail tiles like the Appearance picker in System Settings.
+private struct ShapePicker: View {
+    @Binding var selection: WaveShape
+
+    var body: some View {
+        HStack(spacing: 10) {
+            ForEach(WaveShape.allCases) { shape in
+                let selected = shape == selection
+                Button { selection = shape } label: {
+                    VStack(spacing: 5) {
+                        ZStack(alignment: .top) {
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(LinearGradient(colors: [Color(red: 0.16, green: 0.2, blue: 0.35), Color(red: 0.1, green: 0.13, blue: 0.25)],
+                                                     startPoint: .top, endPoint: .bottom))
+                            UnevenRoundedRectangle(bottomLeadingRadius: 3, bottomTrailingRadius: 3, style: .continuous)
+                                .fill(.black)
+                                .frame(width: 22, height: 7)
+                            Image(systemName: shape.symbol)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(.white.opacity(0.9))
+                                .padding(.top, 13)
+                        }
+                        .frame(width: 60, height: 40)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .strokeBorder(selected ? Color.accentColor : Color.primary.opacity(0.12), lineWidth: selected ? 2.5 : 0.5)
+                        )
+                        Text(shape.title)
+                            .font(.caption)
+                            .fontWeight(selected ? .semibold : .regular)
+                            .foregroundStyle(selected ? Color.accentColor : .primary)
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(shape.title)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
     }
 }
 

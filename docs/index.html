@@ -214,6 +214,13 @@ input[type="range"]:disabled { opacity: 0.4; cursor: default; }
 .swatch[data-style="aurora"] { background: linear-gradient(135deg, #78e8f0, #b6a8ff 55%, #ff9cd6); }
 .swatch[data-style="accent"] { background: var(--accent); }
 
+/* Waveform picker (like the Appearance thumbnails in System Settings) */
+.shapes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.shape { background: transparent; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; font: 400 11px var(--font); letter-spacing: 0; color: var(--fg); min-width: 0; }
+.shape svg { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: 0 0 0 0.5px var(--separator), 0 1px 3px rgba(0, 0, 0, 0.15); }
+.shape[aria-pressed="true"] svg { box-shadow: 0 0 0 2.5px var(--accent); }
+.shape[aria-pressed="true"] { color: var(--accent); font-weight: 600; }
+
 /* Now Playing */
 .np { display: flex; flex-direction: column; gap: 12px; padding: 14px; }
 .np-top { display: flex; gap: 12px; align-items: center; min-width: 0; }
@@ -394,6 +401,16 @@ footer .inner { display: flex; flex-wrap: wrap; justify-content: space-between; 
                   <button class="swatch" data-style="accent" aria-pressed="false" aria-label="System Accent" title="System Accent"></button>
                 </div>
               </div>
+              <div class="row stack">
+                <span class="label" id="shapeLabel">Waveform</span>
+                <div class="shapes" role="group" aria-labelledby="shapeLabel" id="shapes">
+                  <button class="shape" data-shape="wrap" aria-pressed="false"><svg viewBox="0 0 64 40" aria-hidden="true"><rect width="64" height="40" fill="#1b2240"/><rect width="64" height="7" fill="#2a3358"/><path d="M22.00 0.00 L21.79 0.47 L21.55 0.94 L21.28 1.40 L21.01 1.87 L20.79 2.34 L20.64 2.81 L20.58 3.27 L20.72 3.74 L20.90 4.21 L21.04 4.68 L21.10 5.15 L21.07 5.61 L20.96 6.08 L20.77 6.55 L20.54 7.03 L20.36 7.76 L20.34 8.53 L20.52 9.30 L20.90 9.99 L21.46 10.54 L22.14 10.93 L22.89 11.12 L23.63 11.16 L24.33 11.10 L24.98 10.98 L25.45 10.90 L25.92 10.94 L26.39 11.09 L26.85 11.33 L27.32 11.62 L27.79 11.92 L28.26 12.17 L28.73 12.33 L29.19 12.37 L29.66 12.28 L30.13 12.08 L30.60 11.80 L31.06 11.49 L31.53 11.20 L32.00 10.99 L32.47 10.90 L32.94 10.95 L33.40 11.12 L33.87 11.39 L34.34 11.69 L34.81 11.98 L35.27 12.20 L35.74 12.32 L36.21 12.31 L36.68 12.19 L37.15 11.96 L37.61 11.68 L38.08 11.39 L38.55 11.14 L39.02 10.97 L39.63 10.85 L40.23 10.75 L40.86 10.64 L41.53 10.48 L42.21 10.21 L42.85 9.81 L43.39 9.25 L43.77 8.57 L43.95 7.81 L43.90 7.03 L43.72 6.55 L43.50 6.08 L43.27 5.61 L43.08 5.15 L42.95 4.68 L42.90 4.21 L42.94 3.74 L43.02 3.27 L43.01 2.81 L42.96 2.34 L42.86 1.87 L42.70 1.40 L42.48 0.94 L42.24 0.47 L42.00 0.00 Z" fill="#000"/><path d="M22.00 0.00 L21.79 0.47 L21.55 0.94 L21.28 1.40 L21.01 1.87 L20.79 2.34 L20.64 2.81 L20.58 3.27 L20.72 3.74 L20.90 4.21 L21.04 4.68 L21.10 5.15 L21.07 5.61 L20.96 6.08 L20.77 6.55 L20.54 7.03 L20.36 7.76 L20.34 8.53 L20.52 9.30 L20.90 9.99 L21.46 10.54 L22.14 10.93 L22.89 11.12 L23.63 11.16 L24.33 11.10 L24.98 10.98 L25.45 10.90 L25.92 10.94 L26.39 11.09 L26.85 11.33 L27.32 11.62 L27.79 11.92 L28.26 12.17 L28.73 12.33 L29.19 12.37 L29.66 12.28 L30.13 12.08 L30.60 11.80 L31.06 11.49 L31.53 11.20 L32.00 10.99 L32.47 10.90 L32.94 10.95 L33.40 11.12 L33.87 11.39 L34.34 11.69 L34.81 11.98 L35.27 12.20 L35.74 12.32 L36.21 12.31 L36.68 12.19 L37.15 11.96 L37.61 11.68 L38.08 11.39 L38.55 11.14 L39.02 10.97 L39.63 10.85 L40.23 10.75 L40.86 10.64 L41.53 10.48 L42.21 10.21 L42.85 9.81 L43.39 9.25 L43.77 8.57 L43.95 7.81 L43.90 7.03 L43.72 6.55 L43.50 6.08 L43.27 5.61 L43.08 5.15 L42.95 4.68 L42.90 4.21 L42.94 3.74 L43.02 3.27 L43.01 2.81 L42.96 2.34 L42.86 1.87 L42.70 1.40 L42.48 0.94 L42.24 0.47 L42.00 0.00" fill="none" stroke="#e8eeff" stroke-width=".7" stroke-linejoin="round"/><path d="M22 0h20v7q0 3-3 3H25q-3 0-3-3z" fill="#000"/></svg>Wrap</button>
+                  <button class="shape" data-shape="wave" aria-pressed="false"><svg viewBox="0 0 64 40" aria-hidden="true"><rect width="64" height="40" fill="#1b2240"/><rect width="64" height="7" fill="#2a3358"/><path d="M12 0h40v8q0 4-4 4H16q-4 0-4-4z" fill="#000"/><path d="M14 5q3-3.4 6-1t4-1q-1 2 0 2M14 5q3 3.4 6 1t4 1" fill="none" stroke="#e8eeff" stroke-width=".9"/><path d="M50 5q-3-3.4-6-1t-4-1M50 5q-3 3.4-6 1t-4 1" fill="none" stroke="#e8eeff" stroke-width=".9"/><path d="M22 0h20v7q0 3-3 3H25q-3 0-3-3z" fill="#000"/></svg>Wave</button>
+                  <button class="shape" data-shape="bars" aria-pressed="false"><svg viewBox="0 0 64 40" aria-hidden="true"><rect width="64" height="40" fill="#1b2240"/><rect width="64" height="7" fill="#2a3358"/><path d="M12 0h40v8q0 4-4 4H16q-4 0-4-4z" fill="#000"/><rect x="14" y="4.0" width="1.2" height="2" rx=".6" fill="#e8eeff"/><rect x="15.8" y="3.5" width="1.2" height="3" rx=".6" fill="#e8eeff"/><rect x="17.6" y="3.0" width="1.2" height="4" rx=".6" fill="#e8eeff"/><rect x="19.4" y="2.5" width="1.2" height="5" rx=".6" fill="#e8eeff"/><rect x="42.6" y="2.5" width="1.2" height="5" rx=".6" fill="#e8eeff"/><rect x="44.4" y="3.0" width="1.2" height="4" rx=".6" fill="#e8eeff"/><rect x="46.2" y="3.5" width="1.2" height="3" rx=".6" fill="#e8eeff"/><rect x="48" y="4.0" width="1.2" height="2" rx=".6" fill="#e8eeff"/><path d="M22 0h20v7q0 3-3 3H25q-3 0-3-3z" fill="#000"/></svg>Bars</button>
+                  <button class="shape" data-shape="thread" aria-pressed="false"><svg viewBox="0 0 64 40" aria-hidden="true"><rect width="64" height="40" fill="#1b2240"/><rect width="64" height="7" fill="#2a3358"/><path d="M12 0h40v8q0 4-4 4H16q-4 0-4-4z" fill="#000"/><path d="M14 5q1.5-2.5 3 0t3 0 3 0M41 5q1.5-2.5 3 0t3 0 3 0" fill="none" stroke="#e8eeff" stroke-width=".9" stroke-linecap="round"/><path d="M22 0h20v7q0 3-3 3H25q-3 0-3-3z" fill="#000"/></svg>Thread</button>
+                  <button class="shape" data-shape="dots" aria-pressed="false"><svg viewBox="0 0 64 40" aria-hidden="true"><rect width="64" height="40" fill="#1b2240"/><rect width="64" height="7" fill="#2a3358"/><path d="M12 0h40v8q0 4-4 4H16q-4 0-4-4z" fill="#000"/><circle cx="15" cy="3" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="15" cy="5" r=".7" fill="#e8eeff" fill-opacity="1"/><circle cx="15" cy="7" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="17.5" cy="3" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="17.5" cy="5" r=".7" fill="#e8eeff" fill-opacity="1"/><circle cx="17.5" cy="7" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="20" cy="3" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="20" cy="5" r=".7" fill="#e8eeff" fill-opacity="1"/><circle cx="20" cy="7" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="44" cy="3" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="44" cy="5" r=".7" fill="#e8eeff" fill-opacity="1"/><circle cx="44" cy="7" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="46.5" cy="3" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="46.5" cy="5" r=".7" fill="#e8eeff" fill-opacity="1"/><circle cx="46.5" cy="7" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="49" cy="3" r=".7" fill="#e8eeff" fill-opacity="0.5"/><circle cx="49" cy="5" r=".7" fill="#e8eeff" fill-opacity="1"/><circle cx="49" cy="7" r=".7" fill="#e8eeff" fill-opacity="0.5"/><path d="M22 0h20v7q0 3-3 3H25q-3 0-3-3z" fill="#000"/></svg>Dots</button>
+                </div>
+              </div>
               <div class="row">
                 <label for="thickness">Line thickness</label>
                 <div class="ctl"><input type="range" id="thickness" min="0.5" max="3" step="0.1" value="1"><span class="value" id="thicknessV">1.0 pt</span></div>
@@ -522,13 +539,13 @@ open build/NotchWave.app</pre>
 <script>
 (() => {
   // ---------- Settings (mirrors the Mac app's Settings window) ----------
-  const DEFAULTS = { style: 'glass', thickness: 1, height: 100, wing: 112, glass: 70, glow: 60, echoes: true, lip: true, release: 5, hold: 1.6, sens: 0, volume: 80, zoom: false };
+  const DEFAULTS = { shape: 'wrap', style: 'glass', thickness: 1, height: 100, wing: 112, glass: 70, glow: 60, echoes: true, lip: true, release: 5, hold: 1.6, sens: 0, volume: 80, zoom: false };
   const P = Object.assign({}, DEFAULTS);
   try { Object.assign(P, JSON.parse(localStorage.getItem('notchwave.settings') || '{}')); } catch (e) {}
   function save() { try { localStorage.setItem('notchwave.settings', JSON.stringify(P)); } catch (e) {} }
 
   // ---------- Geometry, in macOS points (14-inch MacBook Pro) ----------
-  const NOTCH_W = 185, NOTCH_H = 32, MAX_DROP = 10, EAR = 6, PAD = 4;
+  const NOTCH_W = 185, NOTCH_H = 32, MAX_DROP = 10, EAR = 6, BELOW = 26;   // BELOW: room under the notch for the wrap-around waveform
   const VIRTUAL_SCREEN_W = 1200;
   const BANDS = 24, WAVE = 96;
 
@@ -553,13 +570,13 @@ open build/NotchWave.app</pre>
       s.style.width = ((Number(s.getAttribute('width')) || 15) * scale) + 'px';
       s.style.height = (15 * scale) + 'px';
     }
-    const reach = (NOTCH_W / 2 + P.wing + EAR + 8) * scale;
+    const reach = (NOTCH_W / 2 + (P.shape === 'wrap' ? 22 : P.wing) + EAR + 8) * scale;
     for (const el of menubar.querySelectorAll('.left > span')) {
       el.style.visibility = 'visible';
       if (el.offsetLeft + el.offsetWidth > w / 2 - reach) el.style.visibility = 'hidden';
     }
     for (const el of menubar.querySelectorAll('.right > span')) el.style.visibility = el.offsetLeft < w / 2 + reach ? 'hidden' : 'visible';
-    const cssH = (NOTCH_H + MAX_DROP + PAD) * scale;
+    const cssH = (NOTCH_H + BELOW) * scale;
     canvas.style.width = w + 'px'; canvas.style.height = cssH + 'px';
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(cssH * dpr);
   }
@@ -767,6 +784,9 @@ open build/NotchWave.app</pre>
   function paintSwatches() { for (const b of document.querySelectorAll('#swatches .swatch')) b.setAttribute('aria-pressed', String(b.dataset.style === P.style)); }
   for (const b of document.querySelectorAll('#swatches .swatch')) b.addEventListener('click', () => { P.style = b.dataset.style; paintSwatches(); save(); });
   paintSwatches();
+  function paintShapes() { for (const b of document.querySelectorAll('#shapes .shape')) b.setAttribute('aria-pressed', String(b.dataset.shape === P.shape)); }
+  for (const b of document.querySelectorAll('#shapes .shape')) b.addEventListener('click', () => { P.shape = b.dataset.shape; paintShapes(); layout(); save(); });
+  paintShapes();
 
   $('copyBtn').addEventListener('click', () => {
     const btn = $('copyBtn'), text = $('cmds').textContent;
@@ -836,13 +856,45 @@ open build/NotchWave.app</pre>
   if (mq.addEventListener) mq.addEventListener('change', () => { accentHex = accentNow(); });
   new MutationObserver(() => { accentHex = accentNow(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-  function tintStops(alpha) {
-    if (P.style === 'aurora') return [[0, `rgba(120,232,240,${alpha})`], [0.5, `rgba(182,168,255,${alpha})`], [1, `rgba(255,156,214,${alpha})`]];
-    if (P.style === 'accent') return [[0, hexA(accentHex, alpha)], [1, `rgba(150,200,255,${alpha})`]];
-    return [[0, `rgba(240,244,255,${alpha})`], [1, `rgba(214,224,245,${alpha})`]];
+  // Colour palette per style, from the notch (bass) out to the tips (treble).
+  function palette() {
+    if (P.style === 'aurora') return [[0, [120, 232, 240]], [0.5, [182, 168, 255]], [1, [255, 156, 214]]];
+    if (P.style === 'accent') {
+      const h = accentHex.replace('#', ''), n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+      return [[0, [n >> 16 & 255, n >> 8 & 255, n & 255]], [1, [150, 200, 255]]];
+    }
+    return [[0, [240, 244, 255]], [1, [214, 224, 245]]];
   }
+  const rgba = (c, a) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+  function colourAt(u, a) {
+    const pal = palette();
+    for (let i = 1; i < pal.length; i++) if (u <= pal[i][0]) {
+      const [o0, c0] = pal[i - 1], [o1, c1] = pal[i], t = (u - o0) / (o1 - o0);
+      return rgba([0, 1, 2].map(k => c0[k] + (c1[k] - c0[k]) * t), a);
+    }
+    return rgba(pal[pal.length - 1][1], a);
+  }
+  function tintStops(alpha) { return palette().map(([o, c]) => [o, rgba(c, alpha)]); }
   function tint(x0, x1, alpha) { const gr = g.createLinearGradient(x0, 0, x1, 0); for (const [o, c] of tintStops(alpha)) gr.addColorStop(o, c); return gr; }
+  // Mirrored: bass colour in the middle, treble colour at both ends.
+  function mirrorTint(x0, x1, alpha) {
+    const gr = g.createLinearGradient(x0, 0, x1, 0);
+    for (const [o, c] of tintStops(alpha)) { gr.addColorStop(0.5 - o / 2, c); gr.addColorStop(0.5 + o / 2, c); }
+    return gr;
+  }
+  function glowColour(a) { return P.style === 'aurora' ? `rgba(160,190,255,${a})` : P.style === 'accent' ? hexA(accentHex, a) : `rgba(255,255,255,${a})`; }
+  function withGlow(reveal, fn) {
+    g.save();
+    const glow = P.glow / 100;
+    if (glow > 0) { g.shadowColor = glowColour(0.7 * glow * reveal); g.shadowBlur = 10 * glow * scale * dpr; }
+    fn(); g.restore();
+  }
   const radius = e => 9 + 3 * Math.min(1, e);
+  const ease = t => t * t * (3 - 2 * t);
+  function sample(vals, u) {
+    const f = Math.max(0, Math.min(1, u)) * (vals.length - 1), i = Math.floor(f), fr = f - i;
+    return vals[i] * (1 - fr) + vals[Math.min(i + 1, vals.length - 1)] * fr;
+  }
 
   function islandPath(x0, x1, bottom, e) {
     const r = radius(e), k = 0.45;
@@ -858,26 +910,23 @@ open build/NotchWave.app</pre>
     for (let i = 1; i < pts.length - 1; i++) g.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
     const l = pts[pts.length - 1]; g.lineTo(l[0], l[1]);
   }
-  const ease = t => t * t * (3 - 2 * t);
 
+  // ----- Wave: frosted-glass envelope in each wing -----
   function envelope(vals, start, end, side, edgeX, midY, maxHalf) {
     const N = 56, top = [], bot = [];
     for (let j = 0; j <= N; j++) {
-      const u = j / N, d = start + u * (end - start), f = u * (BANDS - 1), i = Math.floor(f), fr = f - i;
-      const v = vals[i] * (1 - fr) + vals[Math.min(i + 1, BANDS - 1)] * fr;
-      const h = (0.6 + v * maxHalf) * ease(Math.min(1, u / 0.1)) * ease(Math.min(1, (1 - u) / 0.22));
+      const u = j / N, d = start + u * (end - start);
+      const h = (0.6 + sample(vals, u) * maxHalf) * ease(Math.min(1, u / 0.1)) * ease(Math.min(1, (1 - u) / 0.22));
       const x = edgeX + side * d;
       top.push([x, midY - h]); bot.push([x, midY + h]);
     }
     return { top, bot };
   }
-
-  function drawWing(side, cx, wing, midY, maxHalf, fade) {
-    const edgeX = cx + side * NOTCH_W / 2, start = 8, end = wing - 10;
+  function drawWave(side, edgeX, wing, midY, maxHalf, fade) {
+    const start = 8, end = wing - 10;
     if (end - start < 8) return;
     const xn = edgeX + side * start, xf = edgeX + side * end;
     const reveal = Math.min(1, (end - start) / 40) * fade, th = P.thickness;
-
     if (P.echoes) for (const [vals, alpha] of [[R.echo2, 0.16], [R.echo1, 0.3]]) {
       const env = envelope(vals, start, end, side, edgeX, midY, maxHalf);
       g.beginPath(); smooth(env.top, true); smooth(env.bot, true);
@@ -894,24 +943,147 @@ open build/NotchWave.app</pre>
       sheen.addColorStop(1, `rgba(255,255,255,${0.2 * glassAmt * reveal})`);
       g.fillStyle = sheen; g.fill();
     }
-    g.save();
-    const glow = P.glow / 100;
-    if (glow > 0) {
-      g.shadowColor = P.style === 'aurora' ? `rgba(160,190,255,${0.7 * glow * reveal})` : P.style === 'accent' ? hexA(accentHex, 0.75 * glow * reveal) : `rgba(255,255,255,${0.65 * glow * reveal})`;
-      g.shadowBlur = 10 * glow * scale * dpr;
-    }
-    g.beginPath(); smooth(env.top, true); smooth(env.bot, true);
-    g.strokeStyle = tint(xn, xf, 0.95 * reveal); g.lineWidth = 1.1 * th; g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke();
-    g.restore();
+    withGlow(reveal, () => {
+      g.beginPath(); smooth(env.top, true); smooth(env.bot, true);
+      g.strokeStyle = tint(xn, xf, 0.95 * reveal); g.lineWidth = 1.1 * th; g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke();
+    });
     g.beginPath(); smooth(env.top, true);
     g.strokeStyle = `rgba(255,255,255,${0.7 * reveal})`; g.lineWidth = 0.4 * th; g.stroke();
+  }
+
+  // ----- Bars: glass capsules ("candles") -----
+  function drawBars(side, edgeX, wing, midY, maxHalf, fade) {
+    const start = 8, end = wing - 8, bw = 2.2 * P.thickness, pitch = bw + 2;
+    const n = Math.floor((P.wing - 16) / pitch);
+    const glassAmt = P.glass / 100;
+    for (let i = 0; i < n; i++) {
+      const d = start + i * pitch;
+      const reveal = Math.min(1, (end - d - bw) / 12) * fade;
+      if (reveal <= 0) break;
+      const u = i / Math.max(n - 1, 1), v = sample(R.bands, u);
+      const h = Math.max(bw, v * maxHalf * 2), x = side < 0 ? edgeX - d - bw : edgeX + d, y = midY - h / 2;
+      withGlow(reveal, () => {
+        g.beginPath(); g.roundRect ? g.roundRect(x, y, bw, h, bw / 2) : g.rect(x, y, bw, h);
+        g.fillStyle = colourAt(u, (0.55 + 0.45 * v) * reveal); g.fill();
+      });
+      if (glassAmt > 0 && h > bw * 1.5) {
+        const sheen = g.createLinearGradient(0, y, 0, y + h);
+        sheen.addColorStop(0, `rgba(255,255,255,${0.6 * glassAmt * reveal})`);
+        sheen.addColorStop(0.5, 'rgba(255,255,255,0)');
+        g.beginPath(); g.roundRect ? g.roundRect(x, y, bw, h, bw / 2) : g.rect(x, y, bw, h);
+        g.fillStyle = sheen; g.fill();
+      }
+    }
+  }
+
+  // ----- Thread: one fine line per side; its swing follows the spectrum, its detail the waveform -----
+  function drawThread(side, edgeX, wing, midY, maxHalf, fade) {
+    const start = 8, end = wing - 10;
+    if (end - start < 8) return;
+    const reveal = Math.min(1, (end - start) / 40) * fade, pts = [], t = R.last || 0;
+    for (let j = 0; j <= 72; j++) {
+      const u = j / 72, d = start + u * (end - start), v = sample(R.bands, u);
+      const w = R.wave[Math.min(WAVE - 1, Math.floor(u * (WAVE - 1)))] * 2;
+      const swing = Math.sin(d * 0.42 - t * 7) * 0.75 + w;
+      const y = midY + Math.max(-1, Math.min(1, swing * v)) * maxHalf * ease(Math.min(1, u / 0.12)) * ease(Math.min(1, (1 - u) / 0.2));
+      pts.push([edgeX + side * d, y]);
+    }
+    const xn = edgeX + side * start, xf = edgeX + side * end;
+    withGlow(reveal, () => {
+      g.beginPath(); smooth(pts, true);
+      g.strokeStyle = tint(xn, xf, 0.95 * reveal); g.lineWidth = 1.2 * P.thickness; g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke();
+    });
+  }
+
+  // ----- Dots: a small dot matrix, lit from the centre line outwards -----
+  function drawDots(side, edgeX, wing, midY, maxHalf, fade) {
+    const start = 9, end = wing - 8, rDot = 0.95 * P.thickness, pitch = Math.max(3.4, rDot * 3.4);
+    const cols = Math.floor((P.wing - 17) / pitch), rows = Math.max(1, Math.floor(maxHalf / pitch));
+    for (let i = 0; i < cols; i++) {
+      const d = start + i * pitch;
+      const reveal = Math.min(1, (end - d) / 10) * fade;
+      if (reveal <= 0) break;
+      const u = i / Math.max(cols - 1, 1), v = sample(R.bands, u), lit = v * rows, x = edgeX + side * d;
+      withGlow(reveal * Math.min(1, v * 2), () => {
+        for (let k = -rows; k <= rows; k++) {
+          const on = Math.max(0, Math.min(1, lit - Math.abs(k) + 1));
+          const a = (k === 0 ? 0.35 + 0.65 * Math.min(1, v * 3) : on * (1 - Math.abs(k) / (rows + 1) * 0.5)) * reveal;
+          if (a < 0.02) continue;
+          g.beginPath(); g.arc(x, midY + k * pitch, rDot, 0, Math.PI * 2);
+          g.fillStyle = colourAt(u, a); g.fill();
+        }
+      });
+    }
+  }
+
+  // ----- Wrap: one waveform that hugs the notch on three sides -----
+  // Points along the notch's left side, bottom and right side, each with its outward normal.
+  function notchOutline(x0, x1, bottom, r, N) {
+    const side = bottom - r, arc = Math.PI * r / 2, flat = x1 - x0 - 2 * r, total = 2 * side + 2 * arc + flat, pts = [];
+    for (let j = 0; j <= N; j++) {
+      let s = j / N * total, p;
+      if (s < side) p = [x0, s, -1, 0];
+      else if ((s -= side) < arc) { const a = Math.PI - s / r; p = [x0 + r + r * Math.cos(a), bottom - r + r * Math.sin(a), Math.cos(a), Math.sin(a)]; }
+      else if ((s -= arc) < flat) p = [x0 + r + s, bottom, 0, 1];
+      else if ((s -= flat) < arc) { const a = Math.PI / 2 - s / r; p = [x1 - r + r * Math.cos(a), bottom - r + r * Math.sin(a), Math.cos(a), Math.sin(a)]; }
+      else { s -= arc; p = [x1, bottom - r - s, 1, 0]; }
+      p.push(j / N); pts.push(p);
+    }
+    return pts;
+  }
+  function wrapLine(base, vals, amp, fade) {
+    return base.map(([x, y, nx, ny, f]) => {
+      const u = Math.abs(f - 0.5) * 2;                       // 0 at the bottom centre (bass) → 1 at the top ends (treble)
+      const taper = ease(Math.min(1, (1 - u) / 0.14));
+      const d = (1 + sample(vals, u) * amp) * taper * fade;
+      return [x + nx * d, y + ny * d];
+    });
+  }
+  function drawWrap(x0, x1, bottom, e, fade) {
+    const r = radius(e), base = notchOutline(x0, x1, bottom, r, 180);
+    const amp = 13 * P.height / 100, th = P.thickness, glassAmt = P.glass / 100;
+    const xa = x0 - amp - 4, xb = x1 + amp + 4;
+    const line = wrapLine(base, R.bands, amp, fade);
+
+    // The notch grows with the sound: fill the whole shape black…
+    g.beginPath(); smooth(line, true); g.closePath(); g.fillStyle = '#000'; g.fill();
+    // …with a frosted-glass ribbon between the notch and the waveform.
+    if (glassAmt > 0) {
+      g.save();
+      g.beginPath(); smooth(line, true); g.closePath(); g.clip();
+      g.fillStyle = mirrorTint(xa, xb, 0.18 * glassAmt * fade); g.fill();
+      const sheen = g.createLinearGradient(0, bottom - 4, 0, bottom + amp);
+      sheen.addColorStop(0, 'rgba(255,255,255,0)'); sheen.addColorStop(1, `rgba(255,255,255,${0.22 * glassAmt * fade})`);
+      g.fillStyle = sheen; g.fill();
+      g.restore();
+      islandPath(x0, x1, bottom, e); g.fillStyle = '#000'; g.fill();
+    }
+    if (P.echoes) for (const [vals, alpha] of [[R.echo2, 0.16], [R.echo1, 0.32]]) {
+      g.beginPath(); smooth(wrapLine(base, vals, amp, fade), true);
+      g.strokeStyle = mirrorTint(xa, xb, alpha * fade); g.lineWidth = 0.7 * th; g.stroke();
+    }
+    withGlow(fade, () => {
+      g.beginPath(); smooth(line, true);
+      g.strokeStyle = mirrorTint(xa, xb, 0.95 * fade); g.lineWidth = 1.2 * th; g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke();
+    });
+    g.beginPath(); smooth(line, true);
+    g.strokeStyle = `rgba(255,255,255,${0.55 * fade})`; g.lineWidth = 0.4 * th; g.stroke();
   }
 
   function draw() {
     const W = canvas.width / (scale * dpr);
     g.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
-    g.clearRect(0, 0, W, NOTCH_H + MAX_DROP + PAD);
+    g.clearRect(0, 0, W, NOTCH_H + BELOW);
     const e = Math.max(0, R.e), fade = Math.min(1, e), cx = W / 2, nh = NOTCH_H;
+
+    if (P.shape === 'wrap') {
+      // Hardly grows sideways: the waveform itself is the growth.
+      const x0 = cx - NOTCH_W / 2 - 3 * e, x1 = cx + NOTCH_W / 2 + 3 * e, bottom = nh + 2 * e;
+      islandPath(x0, x1, bottom, e); g.fillStyle = '#000'; g.fill();
+      if (fade >= 0.01) drawWrap(x0, x1, bottom, e, fade);
+      return;
+    }
+
     const wing = P.wing * e, drop = MAX_DROP * e;
     const x0 = cx - NOTCH_W / 2 - wing, x1 = cx + NOTCH_W / 2 + wing, bottom = nh + drop;
     islandPath(x0, x1, bottom, e); g.fillStyle = '#000'; g.fill();
@@ -923,8 +1095,8 @@ open build/NotchWave.app</pre>
     g.beginPath(); g.moveTo(x0 + r, bottom - 0.4); g.lineTo(x1 - r, bottom - 0.4); g.strokeStyle = rim; g.lineWidth = 0.6; g.stroke();
 
     const midY = nh / 2, maxHalf = Math.min(nh / 2 - 2, Math.max(nh / 2 - 6, 5) * P.height / 100);
-    drawWing(-1, cx, wing, midY, maxHalf, fade);
-    drawWing(1, cx, wing, midY, maxHalf, fade);
+    const drawSide = { wave: drawWave, bars: drawBars, thread: drawThread, dots: drawDots }[P.shape] || drawWave;
+    for (const side of [-1, 1]) drawSide(side, cx + side * NOTCH_W / 2, wing, midY, maxHalf, fade);
 
     if (!P.lip || drop <= 2) return;
     const left = x0 + r + 4, right = x1 - r - 4, halfSpan = (right - left) / 2;

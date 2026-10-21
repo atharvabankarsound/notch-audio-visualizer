@@ -8,10 +8,16 @@ A live audio waveform that grows out of the MacBook notch. It listens to the mic
 
 - Extends the notch with a black shape that matches its outline, so at rest it is invisible.
 - When sound plays, the shape widens on a spring and smooth frosted-glass line waveforms rise out of flat lines either side of the notch, with faint echo lines trailing behind and a thin waveform along the bottom edge. The line style follows the `line_strip` grooves of the vinyl patch.
+- Five waveform shapes, picked from thumbnails in Settings:
+  - **Wrap** (default): one waveform that hugs the notch on its left, bottom and right sides and pushes outward with the sound, so the notch itself seems to breathe.
+  - **Wave**: frosted-glass line waveforms either side of the notch.
+  - **Bars**: glass capsules ("candles").
+  - **Thread**: one fine line per side.
+  - **Dots**: a small dot matrix.
 - Bass sits next to the notch and treble reaches out to the tips, mirrored left and right. This is the same frequency layout as my Max/MSP and Jitter [rotating-vinyl visualiser](https://github.com/atharvabankarsound/vinyl-audio-visualizer) (lows at the centre, highs at the rim), unrolled along the menu bar.
 - Settles back to a plain notch about 1.6 seconds after the sound stops.
 - Menu bar icon to choose the source (All Computer Audio, Microphone, or a Single App) and the style (Glass, Aurora, System Accent).
-- A Settings window (menu bar icon ▸ Settings…, or ⌘,) with the same controls as the demo website: line thickness, wave height, width, glass, glow, echo lines, waveform under the notch, smoothing, how long it stays open after silence, sensitivity, and a live level meter.
+- A Settings window (menu bar icon ▸ Settings…, or ⌘,) with the same controls as the demo website: waveform shape, colour, line thickness, wave height, width, glass, glow, echo lines, waveform under the notch, smoothing, how long it stays open after silence, sensitivity, and a live level meter.
 - On a display without a notch, a virtual notch appears only while audio is playing.
 
 ## Requirements
