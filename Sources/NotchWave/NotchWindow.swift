@@ -30,7 +30,7 @@ struct NotchGeometry {
 
 /// Fixed design constants for the area around the notch (in points).
 enum NotchLayout {
-    static let maxWing: CGFloat = 112      // how far the black shape grows out of each side
+    static let maxWing: CGFloat = 160      // largest "Width" setting; the window is sized for it
     static let maxDrop: CGFloat = 10       // how far it grows below the notch
     static let ear: CGFloat = 6            // concave flare where the shape meets the screen edge
     static let padding: CGFloat = 4

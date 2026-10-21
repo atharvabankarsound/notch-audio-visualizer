@@ -21,7 +21,7 @@ final class RenderState {
     }
 
     /// Advances springs and smoothing by one display frame.
-    func step(now: TimeInterval, snapshot: AudioSnapshot) {
+    func step(now: TimeInterval, snapshot: AudioSnapshot, smoothing: CGFloat, hold: TimeInterval) {
         let dt = CGFloat(min(max(now - (lastTime ?? now), 0), 1.0 / 30.0))
         lastTime = now
 
@@ -31,7 +31,7 @@ final class RenderState {
         if level > 0.0025 { lastLoudTime = now }
 
         // Stay open briefly through gaps between songs so it doesn't flicker.
-        let target: CGFloat = (now - lastLoudTime) < 1.6 ? 1 : 0
+        let target: CGFloat = (now - lastLoudTime) < hold ? 1 : 0
 
         // Slightly under-damped spring → the gentle overshoot Apple's animations have.
         let stiffness: CGFloat = 170
@@ -45,7 +45,8 @@ final class RenderState {
         let k2 = 1 - exp(-2.5 * dt)
         for i in bands.indices {
             let goal = fresh && i < snapshot.bands.count ? CGFloat(snapshot.bands[i]) : 0
-            let rate: CGFloat = goal > bands[i] ? 24 : 6
+            // More smoothing = slower response (same mapping as the website).
+            let rate: CGFloat = goal > bands[i] ? 34 - smoothing * 2 : 12 - smoothing
             bands[i] += (goal - bands[i]) * (1 - exp(-rate * dt))
             echo1[i] += (bands[i] - echo1[i]) * k1
             echo2[i] += (echo1[i] - echo2[i]) * k2
@@ -77,7 +78,8 @@ struct NotchVisualizerView: View {
         TimelineView(.animation) { _ in
             Canvas { context, size in
                 let now = ProcessInfo.processInfo.systemUptime
-                state.step(now: now, snapshot: analyzer.snapshot())
+                state.step(now: now, snapshot: analyzer.snapshot(),
+                           smoothing: CGFloat(settings.smoothing), hold: settings.hold)
                 draw(in: &context, size: size)
             }
         }
@@ -97,7 +99,7 @@ struct NotchVisualizerView: View {
         if !geometry.hasNotch && fade < 0.01 { return }
 
         let cx = size.width / 2
-        let wing = NotchLayout.maxWing * e
+        let wing = CGFloat(min(settings.width, Double(NotchLayout.maxWing))) * e
         let drop = NotchLayout.maxDrop * e
         let x0 = cx - notchWidth / 2 - wing
         let x1 = cx + notchWidth / 2 + wing
@@ -120,21 +122,21 @@ struct NotchVisualizerView: View {
         // 3. Line waveforms in the two wings, like the line_strip grooves of the vinyl patch.
         //    Bass sits next to the notch, treble at the outer tips, mirrored left/right.
         let midY = notchHeight / 2
-        let maxHalf = max(notchHeight / 2 - 6, 5)
+        let maxHalf = min(notchHeight / 2 - 2, max(notchHeight / 2 - 6, 5) * CGFloat(settings.height / 100))
         for side in [-1.0, 1.0] as [CGFloat] {
             drawWing(in: &context, side: side, cx: cx, notchWidth: notchWidth,
                      wing: wing, midY: midY, maxHalf: maxHalf, fade: fade)
         }
 
         // 4. A thin time-domain waveform "lip" under the notch, mirrored from the centre outwards.
-        guard drop > 2 else { return }
+        guard settings.lipWaveform, drop > 2 else { return }
         let left = x0 + radius + 4
         let right = x1 - radius - 4
         let halfSpan = (right - left) / 2
         guard halfSpan > 4 else { return }
 
         let baseline = notchHeight + drop * 0.45
-        let amplitude = drop * 0.38
+        let amplitude = drop * 0.38 * CGFloat(min(1.3, settings.height / 100))
         var points: [CGPoint] = []
         var x = left
         while x <= right {
@@ -154,7 +156,7 @@ struct NotchVisualizerView: View {
                        with: .linearGradient(Gradient(colors: [far.opacity(0), near, far.opacity(0)]),
                                              startPoint: CGPoint(x: left, y: baseline),
                                              endPoint: CGPoint(x: right, y: baseline)),
-                       style: StrokeStyle(lineWidth: 0.9, lineCap: .round, lineJoin: .round))
+                       style: StrokeStyle(lineWidth: 0.9 * settings.thickness, lineCap: .round, lineJoin: .round))
     }
 
     // MARK: - Waveforms
@@ -173,44 +175,53 @@ struct NotchVisualizerView: View {
             .linearGradient(Gradient(colors: tintColours(alpha: alpha)), startPoint: near, endPoint: far)
         }
 
+        let th = CGFloat(settings.thickness)
+        let glassAmount = settings.glass / 100
+        let glowAmount = settings.glow / 100
+
         // Echo lines: thin and faint, like older grooves behind the current one.
-        for (values, alpha) in [(state.echo2, 0.16), (state.echo1, 0.3)] {
+        for (values, alpha) in settings.echoLines ? [(state.echo2, 0.16), (state.echo1, 0.3)] : [] {
             let env = envelope(values, start: start, end: end, side: side, edgeX: edgeX, midY: midY, maxHalf: maxHalf)
             var lines = Path()
             addSmooth(env.top, to: &lines, move: true)
             addSmooth(env.bottom, to: &lines, move: true)
-            context.stroke(lines, with: tint(alpha * reveal), lineWidth: 0.7)
+            context.stroke(lines, with: tint(alpha * reveal), lineWidth: 0.7 * th)
         }
 
         let env = envelope(state.bands, start: start, end: end, side: side, edgeX: edgeX, midY: midY, maxHalf: maxHalf)
 
         // Frosted-glass body: tinted wash, then a white sheen that's brighter at the top.
-        var body = Path()
-        addSmooth(env.top, to: &body, move: true)
-        addSmooth(env.bottom.reversed(), to: &body, move: false)
-        body.closeSubpath()
-        context.fill(body, with: tint(0.16 * reveal))
-        context.fill(body, with: .linearGradient(
-            Gradient(stops: [.init(color: .white.opacity(0.32 * reveal), location: 0),
-                             .init(color: .white.opacity(0.05 * reveal), location: 0.45),
-                             .init(color: .white.opacity(0.14 * reveal), location: 1)]),
-            startPoint: CGPoint(x: 0, y: midY - maxHalf), endPoint: CGPoint(x: 0, y: midY + maxHalf)))
+        if glassAmount > 0 {
+            var body = Path()
+            addSmooth(env.top, to: &body, move: true)
+            addSmooth(env.bottom.reversed(), to: &body, move: false)
+            body.closeSubpath()
+            let g = glassAmount * reveal
+            context.fill(body, with: tint(0.22 * g))
+            context.fill(body, with: .linearGradient(
+                Gradient(stops: [.init(color: .white.opacity(0.45 * g), location: 0),
+                                 .init(color: .white.opacity(0.07 * g), location: 0.45),
+                                 .init(color: .white.opacity(0.2 * g), location: 1)]),
+                startPoint: CGPoint(x: 0, y: midY - maxHalf), endPoint: CGPoint(x: 0, y: midY + maxHalf)))
+        }
 
         // Edges: a soft blurred glow underneath, the tinted line, then a crisp highlight on top.
         var edges = Path()
         addSmooth(env.top, to: &edges, move: true)
         addSmooth(env.bottom, to: &edges, move: true)
-        let round = StrokeStyle(lineWidth: 1.1, lineCap: .round, lineJoin: .round)
+        let round = StrokeStyle(lineWidth: 1.1 * th, lineCap: .round, lineJoin: .round)
 
-        var glow = context
-        glow.addFilter(.blur(radius: 2.5))
-        glow.stroke(edges, with: .color(glowColour.opacity(0.55 * reveal)), lineWidth: 2)
+        if glowAmount > 0 {
+            var glow = context
+            glow.addFilter(.blur(radius: 4 * glowAmount))
+            glow.stroke(edges, with: .color(glowColour.opacity(0.9 * glowAmount * reveal)), lineWidth: 2 * th)
+        }
 
         context.stroke(edges, with: tint(0.95 * reveal), style: round)
 
         var highlight = Path()
         addSmooth(env.top, to: &highlight, move: true)
-        context.stroke(highlight, with: .color(.white.opacity(0.7 * reveal)), lineWidth: 0.45)
+        context.stroke(highlight, with: .color(.white.opacity(0.7 * reveal)), lineWidth: 0.4 * th)
     }
 
     /// Upper and lower edges of one wing's waveform. Samples the bands smoothly and

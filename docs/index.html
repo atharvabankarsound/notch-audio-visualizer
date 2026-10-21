@@ -1,78 +1,121 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NotchWave</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one big MacBook lid as the hero, the live notch at its top edge; a control strip under it; then a quiet single column explaining the build. */
+/* Layout: an Apple product page. Sticky glass nav, centred hero with the MacBook, a macOS
+   settings window with the live controls, feature tiles, then a "Get it" block. System font
+   on purpose: on a Mac this renders in SF Pro, which is what makes it read as Apple. */
 :root {
-  --bg: #e9ecf0;          /* anodised aluminium, slight blue cast */
-  --surface: #f6f7f9;
-  --line: #cfd4dc;
-  --fg: #16181d;          /* graphite */
-  --muted: #5b6270;
-  --accent: #0c6f78;      /* the bass colour of the waveform, deepened for text */
-  --accent-ink: #ffffff;
-  --code-bg: #dfe3e9;
-  --bezel: #0a0a0c;
-  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
-  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --bg: #f5f5f7;
+  --bg-alt: #ffffff;
+  --fg: #1d1d1f;
+  --fg2: #6e6e73;
+  --fg3: #86868b;
+  --accent: #0071e3;
+  --accent-fg: #ffffff;
+  --window: rgba(246, 246, 248, 0.86);
+  --group: #ffffff;
+  --separator: rgba(0, 0, 0, 0.09);
+  --control: rgba(0, 0, 0, 0.06);
+  --control-strong: rgba(0, 0, 0, 0.12);
+  --knob: #ffffff;
+  --seg-on: #ffffff;
+  --seg-on-fg: #1d1d1f;
+  --track: rgba(0, 0, 0, 0.12);
+  --nav: rgba(250, 250, 252, 0.78);
+  --tile: #ffffff;
+  --code: #e8e8ed;
+  --warn: #d70015;
+  --shadow: 0 22px 60px -20px rgba(0, 0, 0, 0.28), 0 0 0 0.5px rgba(0, 0, 0, 0.14);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #111317; --surface: #191c22; --line: #2b303a; --fg: #e8eaee; --muted: #9aa1ad;
-    --accent: #62d3cc; --accent-ink: #06201f; --code-bg: #1f232b; --bezel: #000000; color-scheme: dark;
+    --bg: #000000; --bg-alt: #0b0b0c; --fg: #f5f5f7; --fg2: #a1a1a6; --fg3: #86868b;
+    --accent: #2997ff; --accent-fg: #ffffff;
+    --window: rgba(36, 36, 38, 0.86); --group: #2c2c2e;
+    --separator: rgba(255, 255, 255, 0.09); --control: rgba(255, 255, 255, 0.08); --control-strong: rgba(255, 255, 255, 0.16);
+    --knob: #e9e9eb; --seg-on: #636366; --seg-on-fg: #ffffff; --track: rgba(255, 255, 255, 0.16);
+    --nav: rgba(22, 22, 23, 0.78); --tile: #161617; --code: #1c1c1e; --warn: #ff6961;
+    --shadow: 0 22px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 0.5px rgba(255, 255, 255, 0.14);
+    color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #111317; --surface: #191c22; --line: #2b303a; --fg: #e8eaee; --muted: #9aa1ad;
-  --accent: #62d3cc; --accent-ink: #06201f; --code-bg: #1f232b; --bezel: #000000; color-scheme: dark;
+  --bg: #000000; --bg-alt: #0b0b0c; --fg: #f5f5f7; --fg2: #a1a1a6; --fg3: #86868b;
+  --accent: #2997ff; --accent-fg: #ffffff;
+  --window: rgba(36, 36, 38, 0.86); --group: #2c2c2e;
+  --separator: rgba(255, 255, 255, 0.09); --control: rgba(255, 255, 255, 0.08); --control-strong: rgba(255, 255, 255, 0.16);
+  --knob: #e9e9eb; --seg-on: #636366; --seg-on-fg: #ffffff; --track: rgba(255, 255, 255, 0.16);
+  --nav: rgba(22, 22, 23, 0.78); --tile: #161617; --code: #1c1c1e; --warn: #ff6961;
+  --shadow: 0 22px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 0.5px rgba(255, 255, 255, 0.14);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
 body {
+  margin: 0;
   background: var(--bg); color: var(--fg);
-  font-family: var(--body); font-size: 16px; line-height: 1.6;
+  font-family: var(--font); font-size: 17px; line-height: 1.47; letter-spacing: -0.022em;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 2px; border-radius: 6px; }
+.gutter {
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 28px 56px;
 }
-a { color: var(--accent); text-underline-offset: 3px; }
-a:focus-visible, button:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 3px; }
+.inner { max-width: 980px; margin: 0 auto; }
 
-.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
-
-header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
-.brand { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -0.01em; }
-.top nav { display: flex; gap: 18px; font-size: 0.92rem; }
-.top nav a { color: var(--muted); text-decoration: none; }
-.top nav a:hover { color: var(--fg); }
-
-.intro { display: flex; flex-direction: column; gap: 10px; max-width: 62ch; }
-.intro h1 {
-  font-family: var(--display); font-weight: 600; font-size: clamp(2rem, 5.2vw, 3.6rem);
-  line-height: 1.02; letter-spacing: -0.03em; margin: 0; text-wrap: balance;
+/* ---------- Nav ---------- */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--nav); }
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--nav); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--separator);
 }
-.intro p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+.nav .inner { height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.nav .name { font-weight: 600; font-size: 19px; letter-spacing: -0.02em; color: var(--fg); }
+.nav .name:hover { text-decoration: none; }
+.nav .links { display: flex; align-items: center; gap: 22px; font-size: 12px; letter-spacing: -0.01em; }
+.nav .links a { color: var(--fg2); }
+.nav .links a:hover { color: var(--fg); text-decoration: none; }
+.nav .links a.pill { color: var(--accent-fg); }
+.pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--accent-fg); border-radius: 980px;
+  padding: 4px 12px; font-size: 12px; font-weight: 400;
+}
+.pill:hover { text-decoration: none; filter: brightness(1.08); }
+.pill.big { font-size: 17px; padding: 11px 22px; }
+@media (max-width: 600px) { .nav .links a:not(.pill) { display: none; } }
 
-/* ---------- The MacBook ---------- */
-.laptop { width: 100%; }
+/* ---------- Hero ---------- */
+.hero { text-align: center; padding-block: 56px 28px; }
+.eyebrow { font-size: 21px; font-weight: 600; color: var(--fg); letter-spacing: 0.011em; margin: 0 0 6px; }
+.hero h1 {
+  font-family: var(--display); font-size: clamp(44px, 8vw, 80px); line-height: 1.05; font-weight: 700;
+  letter-spacing: -0.015em; margin: 0; text-wrap: balance;
+}
+.glass-text {
+  background: linear-gradient(100deg, #7d8fb0 0%, #b9c6e2 30%, #8a9bbd 55%, #c9d4ec 80%, #95a6c6 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero p.sub { font-size: clamp(19px, 2.4vw, 24px); line-height: 1.33; color: var(--fg2); max-width: 30em; margin: 16px auto 0; text-wrap: balance; }
+.hero .ctas { display: flex; gap: 22px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 22px; font-size: 17px; }
+
+/* ---------- MacBook ---------- */
+.laptop { max-width: 980px; margin: 32px auto 0; }
 .lid {
-  background: var(--bezel);
-  border-radius: 22px 22px 6px 6px;
+  background: #0a0a0c; border-radius: 22px 22px 6px 6px;
   padding: clamp(6px, 1.2vw, 12px) clamp(6px, 1.2vw, 12px) clamp(14px, 2.4vw, 24px);
-  box-shadow: 0 0 0 1px #2a2c31, 0 30px 60px -30px rgba(10, 20, 40, 0.45);
+  box-shadow: 0 0 0 1px #2a2c31, 0 40px 80px -40px rgba(0, 0, 0, 0.5);
 }
-.display {
-  position: relative; overflow: hidden; border-radius: 12px 12px 2px 2px;
-  aspect-ratio: 16 / 8.4; max-width: 100%;
-  background: #0d1424;
-}
-.zoomer { position: absolute; inset: 0; transform-origin: 50% 0; transition: transform 0.6s cubic-bezier(.2,.8,.2,1); }
-@media (prefers-reduced-motion: reduce) { .zoomer { transition: none; } }
+.display { position: relative; overflow: hidden; border-radius: 12px 12px 2px 2px; aspect-ratio: 16 / 8.6; max-width: 100%; background: #0d1424; }
+.zoomer { position: absolute; inset: 0; transform-origin: 50% 0; transition: transform 0.7s cubic-bezier(.2, .8, .2, 1); }
 .wallpaper {
   position: absolute; inset: 0;
   background:
@@ -81,241 +124,381 @@ header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-cont
     radial-gradient(70% 60% at 50% 10%, rgba(70, 70, 150, 0.6), transparent 70%),
     linear-gradient(180deg, #121a33 0%, #28305c 42%, #6b4a72 72%, #c98476 100%);
 }
-.wallpaper::after { /* faint horizon line, like water */
-  content: ""; position: absolute; left: 0; right: 0; top: 68%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-}
 .menubar {
-  position: absolute; left: 0; right: 0; top: 0;
-  display: flex; align-items: center; justify-content: space-between;
-  color: rgba(255,255,255,0.92);
-  background: rgba(10, 14, 28, 0.28);
+  position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; justify-content: space-between;
+  color: rgba(255, 255, 255, 0.94); background: rgba(10, 14, 28, 0.24);
   backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
-  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", var(--body);
-  white-space: nowrap;
+  font-family: var(--font); letter-spacing: 0; white-space: nowrap;
 }
 .menubar .left, .menubar .right { display: flex; align-items: center; }
 .menubar .app { font-weight: 700; }
 .menubar svg { display: block; }
 .notch-canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
 .screen-chip {
-  position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%);
-  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
-  color: rgba(255,255,255,0.78); background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.14);
-  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%);
+  font-size: 12px; letter-spacing: 0; color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.12); border: 0.5px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  padding: 6px 14px; border-radius: 999px; white-space: nowrap;
 }
 .base {
   height: clamp(8px, 1.4vw, 14px); margin: 0 -2.5%;
   background: linear-gradient(180deg, #d5d8de, #a9aeb7 70%, #7f848d);
   border-radius: 0 0 14px 14px / 0 0 10px 10px; position: relative;
 }
-.base::before { /* the thumb scoop */
-  content: ""; position: absolute; left: 50%; top: 0; transform: translateX(-50%);
-  width: 14%; height: 45%; background: #9aa0a9; border-radius: 0 0 8px 8px;
-}
+.base::before { content: ""; position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 14%; height: 45%; background: #9aa0a9; border-radius: 0 0 8px 8px; }
 
-/* ---------- Controls ---------- */
-.controls {
-  display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px 28px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
-  padding: 18px 20px;
-}
-.group { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.group-label { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.seg { display: flex; flex-wrap: wrap; gap: 6px; }
-.seg button, .seg label.btn {
-  font: 500 0.9rem var(--body); color: var(--fg);
-  background: transparent; border: 1px solid var(--line); border-radius: 8px;
-  padding: 7px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
-}
-.seg button:hover, .seg label.btn:hover { border-color: var(--muted); }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.seg label.btn input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-.status { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; font-size: 0.92rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
-.status strong { color: var(--fg); font-weight: 600; }
-.meter { flex: 0 0 120px; height: 6px; border-radius: 3px; background: var(--code-bg); overflow: hidden; }
-.meter i { display: block; height: 100%; width: 0%; background: var(--accent); transition: width 0.08s linear; }
-.status .msg { flex-basis: 100%; color: var(--fg); }
-.status .msg:empty { display: none; }
+/* ---------- Sections ---------- */
+.section { padding-block: 64px; }
+.section-head { text-align: center; margin-bottom: 30px; }
+.section-head h2 { font-family: var(--display); font-size: clamp(32px, 5vw, 48px); line-height: 1.08; font-weight: 700; letter-spacing: -0.003em; margin: 0; text-wrap: balance; }
+.section-head p { color: var(--fg2); font-size: 19px; margin: 10px auto 0; max-width: 34em; text-wrap: balance; }
 
-/* ---------- Write-up ---------- */
-main.story { display: flex; flex-direction: column; gap: 40px; margin-top: 8px; }
-section { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 8px 40px; }
-section h2 { font-family: var(--display); font-weight: 600; font-size: 1.35rem; letter-spacing: -0.015em; margin: 0; line-height: 1.2; text-wrap: balance; }
-section .body { display: flex; flex-direction: column; gap: 14px; max-width: 66ch; min-width: 0; }
-section p { margin: 0; }
-.pipeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.pipeline li { padding: 16px; display: flex; flex-direction: column; gap: 6px; background: var(--surface); min-width: 0; }
-.pipeline li + li { border-left: 1px solid var(--line); }
-.pipeline .step { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
-.pipeline h3 { margin: 0; font-family: var(--display); font-size: 1.1rem; font-weight: 600; }
-.pipeline p { font-size: 0.93rem; color: var(--muted); }
-.pipeline code, .body code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
-.mapping { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
-.mapping figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.mapping figcaption { font-size: 0.88rem; color: var(--muted); }
-.mapping svg { width: 100%; height: auto; display: block; border-radius: 10px; background: #0b0d12; }
-.codeblock { position: relative; background: var(--code-bg); border-radius: 10px; overflow-x: auto; }
-.codeblock pre { margin: 0; padding: 16px 18px; font-family: var(--mono); font-size: 0.88rem; line-height: 1.7; }
-.copy { position: absolute; top: 8px; right: 8px; font: 500 0.8rem var(--body); background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
-.facts { display: grid; grid-template-columns: max-content minmax(0,1fr); gap: 6px 18px; margin: 0; font-size: 0.95rem; }
-.facts dt { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); padding-top: 2px; }
-.facts dd { margin: 0; }
-footer { border-top: 1px solid var(--line); padding-top: 18px; color: var(--muted); font-size: 0.9rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+/* ---------- macOS window ---------- */
+.window {
+  max-width: 820px; margin: 0 auto; border-radius: 12px; overflow: hidden;
+  background: var(--window); backdrop-filter: blur(40px) saturate(1.6); -webkit-backdrop-filter: blur(40px) saturate(1.6);
+  box-shadow: var(--shadow);
+}
+.titlebar { height: 38px; display: flex; align-items: center; position: relative; border-bottom: 0.5px solid var(--separator); }
+.lights { display: flex; gap: 8px; padding-left: 14px; }
+.lights i { width: 12px; height: 12px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18); }
+.lights i:nth-child(1) { background: #ff5f57; } .lights i:nth-child(2) { background: #febc2e; } .lights i:nth-child(3) { background: #28c840; }
+.titlebar .title { position: absolute; left: 0; right: 0; text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 0; pointer-events: none; }
+.panes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 20px; }
+.pane { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.group-title { font-size: 13px; font-weight: 600; letter-spacing: 0; color: var(--fg); margin: 0 0 6px 4px; }
+.group { background: var(--group); border-radius: 10px; box-shadow: 0 0 0 0.5px var(--separator); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 12px; min-height: 40px; font-size: 13px; letter-spacing: 0; }
+.row + .row { border-top: 0.5px solid var(--separator); }
+.row label, .row .label { flex: 0 0 auto; color: var(--fg); }
+.row .value { font-variant-numeric: tabular-nums; color: var(--fg3); font-size: 12px; min-width: 3.6em; text-align: right; }
+.row.stack { flex-direction: column; align-items: stretch; gap: 8px; }
+.row .ctl { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; justify-content: flex-end; min-width: 0; max-width: 220px; }
+.hint { font-size: 12px; color: var(--fg3); padding: 0 4px; margin: 6px 0 0; letter-spacing: 0; }
+.hint:empty { display: none; }
+.hint.warn { color: var(--warn); }
+
+/* Segmented control */
+.segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--control); border-radius: 7px; padding: 2px; gap: 2px; }
+.segmented button {
+  font: 500 12px var(--font); letter-spacing: 0; color: var(--fg); background: transparent; border: 0;
+  border-radius: 5px; padding: 5px 4px; cursor: pointer; white-space: nowrap; min-width: 0;
+}
+.segmented button[aria-pressed="true"] { background: var(--seg-on); color: var(--seg-on-fg); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.06); }
+
+/* Slider */
+input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; min-width: 70px; height: 18px; background: transparent; margin: 0; cursor: pointer; --p: 50%;
+}
+input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent) var(--p), var(--track) var(--p)); }
+input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent) var(--p), var(--track) var(--p)); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 50%; background: var(--knob); box-shadow: 0 0.5px 3px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(0, 0, 0, 0.1); }
+input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--knob); box-shadow: 0 0.5px 3px rgba(0, 0, 0, 0.35); }
+input[type="range"]:disabled { opacity: 0.4; cursor: default; }
+
+/* Switch */
+.switch { position: relative; width: 38px; height: 22px; flex: 0 0 auto; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; width: 100%; height: 100%; }
+.switch span { position: absolute; inset: 0; border-radius: 11px; background: var(--control-strong); transition: background 0.2s; }
+.switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); transition: transform 0.2s; }
+.switch input:checked + span { background: var(--accent); }
+.switch input:checked + span::after { transform: translateX(16px); }
+.switch input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 2px; }
+
+/* Style swatches (like the accent colour picker in System Settings) */
+.swatches { display: flex; gap: 12px; padding-right: 2px; }
+.swatch { width: 20px; height: 20px; border-radius: 50%; border: 0; cursor: pointer; padding: 0; position: relative; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.2); }
+.swatch[aria-pressed="true"]::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; box-shadow: 0 0 0 2px var(--fg3); }
+.swatch[data-style="glass"] { background: linear-gradient(135deg, #f4f7ff, #b9c4da 60%, #e9eef8); }
+.swatch[data-style="aurora"] { background: linear-gradient(135deg, #78e8f0, #b6a8ff 55%, #ff9cd6); }
+.swatch[data-style="accent"] { background: var(--accent); }
+
+/* Now Playing */
+.np { display: flex; flex-direction: column; gap: 12px; padding: 14px; }
+.np-top { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.art { width: 56px; height: 56px; border-radius: 8px; flex: 0 0 auto; position: relative; overflow: hidden; background: linear-gradient(135deg, #2b3566, #7b5d8f 55%, #e19c84); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); }
+.art canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.np-meta { min-width: 0; display: flex; flex-direction: column; }
+.np-title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-sub { font-size: 13px; color: var(--fg2); letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scrub { display: flex; flex-direction: column; gap: 2px; }
+.times { display: flex; justify-content: space-between; font-size: 11px; color: var(--fg3); font-variant-numeric: tabular-nums; letter-spacing: 0; min-height: 1.3em; }
+.transport { display: flex; justify-content: center; align-items: center; gap: 28px; }
+.tbtn { background: transparent; border: 0; color: var(--fg); cursor: pointer; padding: 4px; border-radius: 50%; display: inline-flex; }
+.tbtn:disabled { opacity: 0.3; cursor: default; }
+.tbtn.main svg { width: 30px; height: 30px; }
+.volume { display: flex; align-items: center; gap: 8px; color: var(--fg3); }
+.meter { height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; flex: 1; }
+.meter i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #34c759, #ffd60a 80%, #ff453a); transition: width 0.08s linear; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Feature tiles ---------- */
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tile { background: var(--tile); border-radius: 22px; padding: 28px 26px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.tile .kicker { font-size: 14px; font-weight: 600; color: var(--fg2); letter-spacing: -0.01em; }
+.tile h3 { font-family: var(--display); font-size: 26px; line-height: 1.12; font-weight: 700; letter-spacing: 0.004em; margin: 0; text-wrap: balance; }
+.tile p { margin: 0; color: var(--fg2); font-size: 15px; letter-spacing: -0.01em; }
+.tile .big { font-family: var(--display); font-size: 56px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; background: linear-gradient(100deg, #5ac8fa, #af52de 60%, #ff2d55); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tile.wide { grid-column: span 2; }
+
+/* ---------- Get it ---------- */
+.get { background: var(--bg-alt); }
+.get-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 32px; align-items: start; }
+.specs { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 12px 20px; margin: 0; font-size: 15px; letter-spacing: -0.01em; }
+.specs dt { color: var(--fg3); }
+.specs dd { margin: 0; }
+.codeblock { position: relative; background: var(--code); border-radius: 12px; overflow-x: auto; }
+.codeblock pre { margin: 0; padding: 18px 20px; font-family: var(--mono); font-size: 13px; line-height: 1.75; letter-spacing: 0; }
+.copy { position: absolute; top: 10px; right: 10px; font: 500 12px var(--font); letter-spacing: 0; background: var(--group); color: var(--fg); border: 0; box-shadow: 0 0 0 0.5px var(--separator); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.get .note { color: var(--fg2); font-size: 15px; margin: 14px 0 0; letter-spacing: -0.01em; }
+footer { font-size: 12px; color: var(--fg3); padding-block: 22px 32px; letter-spacing: 0; background: var(--bg-alt); }
+footer .inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; border-top: 0.5px solid var(--separator); padding-top: 16px; }
 
 @media (max-width: 760px) {
-  .controls { grid-template-columns: 1fr; }
-  section { grid-template-columns: 1fr; }
-  .pipeline { grid-template-columns: 1fr; }
-  .pipeline li + li { border-left: 0; border-top: 1px solid var(--line); }
-  .mapping { grid-template-columns: 1fr; }
+  .panes { grid-template-columns: minmax(0, 1fr); padding: 14px; }
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+  .tile.wide { grid-column: auto; }
+  .get-grid { grid-template-columns: minmax(0, 1fr); }
+  .section { padding-block: 48px; }
 }
+@media (prefers-reduced-motion: reduce) { .zoomer, .switch span, .switch span::after { transition: none; } }
 </style>
 </head><body>
 
-<div class="wrap">
-  <header class="top">
-    <div class="brand">NotchWave</div>
-    <nav aria-label="Page sections">
-      <a href="#how">How it works</a>
-      <a href="#run">Run it</a>
-      <a href="https://github.com/atharvabankarsound/notch-audio-visualizer">Source</a>
-    </nav>
-  </header>
-
-  <div class="intro">
-    <h1>Your Mac’s notch, listening.</h1>
-    <p>A live audio waveform that grows out of the MacBook notch, from the microphone, everything your Mac is playing, or a single app. This page runs the same visualiser in your browser.</p>
+<nav class="nav gutter" aria-label="NotchWave">
+  <div class="inner">
+    <a class="name" href="#top">NotchWave</a>
+    <div class="links">
+      <a href="#try">Try it</a>
+      <a href="#features">Features</a>
+      <a href="#get">Get it</a>
+      <a class="pill" href="https://github.com/atharvabankarsound/notch-audio-visualizer">Download</a>
+    </div>
   </div>
+</nav>
 
-  <div class="laptop" aria-label="Simulated MacBook screen showing the notch visualiser">
-    <div class="lid">
-      <div class="display" id="display">
-        <div class="zoomer" id="zoomer">
-          <div class="wallpaper"></div>
-          <div class="menubar" id="menubar">
-            <div class="left" id="mbLeft">
-              <span class="glyph" aria-hidden="true">
-                <svg id="logoGlyph" viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.6 8h1.3l1-2.4 1.6 4.8 1-2.4h1.9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </span>
-              <span class="app">Music</span><span>File</span><span>Edit</span><span>Song</span><span>View</span><span>Window</span>
+<header class="hero gutter" id="top">
+  <div class="inner">
+    <p class="eyebrow">NotchWave</p>
+    <h1>The notch, <span class="glass-text">in glass.</span></h1>
+    <p class="sub">A live waveform that grows out of your MacBook’s notch. It listens to the microphone, everything your Mac plays, or a single app.</p>
+    <div class="ctas">
+      <a class="pill big" href="#try">Try it live</a>
+      <a href="https://github.com/atharvabankarsound/notch-audio-visualizer">View on GitHub ›</a>
+    </div>
+
+    <div class="laptop" aria-label="Simulated MacBook screen showing the notch visualiser">
+      <div class="lid">
+        <div class="display" id="display">
+          <div class="zoomer" id="zoomer">
+            <div class="wallpaper"></div>
+            <div class="menubar" id="menubar">
+              <div class="left">
+                <span aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.6 8h1.3l1-2.4 1.6 4.8 1-2.4h1.9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span class="app">Music</span><span>File</span><span>Edit</span><span>Song</span><span>View</span><span>Window</span>
+              </div>
+              <div class="right">
+                <span aria-hidden="true"><svg viewBox="0 0 16 16" width="15" height="15"><path d="M2 9h1.6M5 6v6M8 3.5v9M11 6v6M14 9h-1.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+                <span aria-hidden="true"><svg viewBox="0 0 24 16" width="22" height="15"><rect x="1" y="3" width="19" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="5" width="13" height="6" rx="1.5" fill="currentColor"/><rect x="21" y="6.2" width="1.6" height="3.6" rx=".8" fill="currentColor"/></svg></span>
+                <span aria-hidden="true"><svg viewBox="0 0 16 16" width="15" height="15"><path d="M1.8 6.2a9 9 0 0 1 12.4 0M4 8.6a5.8 5.8 0 0 1 8 0M6.2 11a2.6 2.6 0 0 1 3.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+                <span id="clock">Wed 21 Oct 01:30</span>
+              </div>
             </div>
-            <div class="right" id="mbRight">
-              <span aria-hidden="true"><svg viewBox="0 0 16 16" width="15" height="15"><path d="M2 9h1.6M5 6v6M8 3.5v9M11 6v6M14 9h-1.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-              <span aria-hidden="true"><svg viewBox="0 0 24 16" width="22" height="15"><rect x="1" y="3" width="19" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="5" width="13" height="6" rx="1.5" fill="currentColor"/><rect x="21" y="6.2" width="1.6" height="3.6" rx=".8" fill="currentColor"/></svg></span>
-              <span aria-hidden="true"><svg viewBox="0 0 16 16" width="15" height="15"><path d="M1.8 6.2a9 9 0 0 1 12.4 0M4 8.6a5.8 5.8 0 0 1 8 0M6.2 11a2.6 2.6 0 0 1 3.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-              <span id="clock">Wed 21 Oct 00:31</span>
+            <canvas class="notch-canvas" id="notch"></canvas>
+            <div class="screen-chip" id="chip">Preview. Press play below to hear it.</div>
+          </div>
+        </div>
+      </div>
+      <div class="base" aria-hidden="true"></div>
+    </div>
+  </div>
+</header>
+
+<section class="section gutter" id="try">
+  <div class="inner">
+    <div class="section-head">
+      <h2>Make it yours.</h2>
+      <p>The same settings as the Mac app. Every change shows up on the notch above straight away.</p>
+    </div>
+
+    <div class="window" role="region" aria-label="NotchWave settings">
+      <div class="titlebar"><div class="lights" aria-hidden="true"><i></i><i></i><i></i></div><div class="title">NotchWave</div></div>
+      <div class="panes">
+        <div class="pane">
+          <div>
+            <p class="group-title">Now Playing</p>
+            <div class="group">
+              <div class="np">
+                <div class="np-top">
+                  <div class="art" aria-hidden="true"><canvas id="art" width="112" height="112"></canvas></div>
+                  <div class="np-meta">
+                    <span class="np-title" id="npTitle">Not playing</span>
+                    <span class="np-sub" id="npSub">Choose an input, or press play for the demo</span>
+                  </div>
+                </div>
+                <div class="scrub">
+                  <label class="visually-hidden" for="seek">Playback position</label>
+                  <input type="range" id="seek" min="0" max="1000" value="0" disabled>
+                  <div class="times"><span id="tNow">0:00</span><span id="tEnd">--:--</span></div>
+                </div>
+                <div class="transport">
+                  <button class="tbtn" id="back" aria-label="Back 10 seconds" disabled><svg viewBox="0 0 24 24" width="22" height="22"><path d="M11 6 4 12l7 6zM20 6l-7 6 7 6z" fill="currentColor"/></svg></button>
+                  <button class="tbtn main" id="playPause" aria-label="Play"><svg viewBox="0 0 24 24" id="ppIcon"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg></button>
+                  <button class="tbtn" id="fwd" aria-label="Forward 10 seconds" disabled><svg viewBox="0 0 24 24" width="22" height="22"><path d="m13 6 7 6-7 6zM4 6l7 6-7 6z" fill="currentColor"/></svg></button>
+                </div>
+                <div class="volume">
+                  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 6h2.5L8 3v10L4.5 10H2z" fill="currentColor"/></svg>
+                  <label class="visually-hidden" for="volume">Volume</label>
+                  <input type="range" id="volume" min="0" max="100" value="80">
+                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1.5 6H4l3.5-3v10L4 10H1.5z" fill="currentColor"/><path d="M10 5.2a3.5 3.5 0 0 1 0 5.6M12 3.3a6 6 0 0 1 0 9.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                </div>
+              </div>
             </div>
           </div>
-          <canvas class="notch-canvas" id="notch"></canvas>
-          <div class="screen-chip" id="chip">Preview · press Play demo to hear it</div>
+
+          <div>
+            <p class="group-title">Input</p>
+            <div class="group">
+              <div class="row stack">
+                <div class="segmented" role="group" aria-label="Audio input" id="inputSeg">
+                  <button data-src="demo" aria-pressed="false">Demo</button>
+                  <button data-src="file" aria-pressed="false">Track…</button>
+                  <button data-src="mic" aria-pressed="false">Mic</button>
+                  <button data-src="tab" aria-pressed="false">Tab Audio</button>
+                </div>
+                <input type="file" id="fileInput" accept="audio/*" class="visually-hidden" tabindex="-1">
+              </div>
+              <div class="row">
+                <span class="label">Level</span>
+                <div class="ctl"><div class="meter" aria-hidden="true"><i id="meterFill"></i></div></div>
+              </div>
+              <div class="row">
+                <label for="sens">Sensitivity</label>
+                <div class="ctl"><input type="range" id="sens" min="-12" max="12" step="1" value="0"><span class="value" id="sensV">0 dB</span></div>
+              </div>
+            </div>
+            <p class="hint" id="msg"></p>
+          </div>
+        </div>
+
+        <div class="pane">
+          <div>
+            <p class="group-title">Appearance</p>
+            <div class="group">
+              <div class="row">
+                <span class="label" id="styleLabel">Style</span>
+                <div class="swatches" role="group" aria-labelledby="styleLabel" id="swatches">
+                  <button class="swatch" data-style="glass" aria-pressed="true" aria-label="Glass" title="Glass"></button>
+                  <button class="swatch" data-style="aurora" aria-pressed="false" aria-label="Aurora" title="Aurora"></button>
+                  <button class="swatch" data-style="accent" aria-pressed="false" aria-label="System Accent" title="System Accent"></button>
+                </div>
+              </div>
+              <div class="row">
+                <label for="thickness">Line thickness</label>
+                <div class="ctl"><input type="range" id="thickness" min="0.5" max="3" step="0.1" value="1"><span class="value" id="thicknessV">1.0 pt</span></div>
+              </div>
+              <div class="row">
+                <label for="height">Wave height</label>
+                <div class="ctl"><input type="range" id="height" min="40" max="150" step="5" value="100"><span class="value" id="heightV">100%</span></div>
+              </div>
+              <div class="row">
+                <label for="wing">Width</label>
+                <div class="ctl"><input type="range" id="wing" min="60" max="160" step="4" value="112"><span class="value" id="wingV">112 pt</span></div>
+              </div>
+              <div class="row">
+                <label for="glass">Glass</label>
+                <div class="ctl"><input type="range" id="glass" min="0" max="100" step="5" value="70"><span class="value" id="glassV">70%</span></div>
+              </div>
+              <div class="row">
+                <label for="glow">Glow</label>
+                <div class="ctl"><input type="range" id="glow" min="0" max="100" step="5" value="60"><span class="value" id="glowV">60%</span></div>
+              </div>
+              <div class="row">
+                <label for="echoes">Echo lines</label>
+                <span class="switch"><input type="checkbox" id="echoes" role="switch" checked><span></span></span>
+              </div>
+              <div class="row">
+                <label for="lip">Waveform under notch</label>
+                <span class="switch"><input type="checkbox" id="lip" role="switch" checked><span></span></span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="group-title">Motion</p>
+            <div class="group">
+              <div class="row">
+                <label for="release">Smoothing</label>
+                <div class="ctl"><input type="range" id="release" min="1" max="10" step="1" value="5"><span class="value" id="releaseV">5</span></div>
+              </div>
+              <div class="row">
+                <label for="hold">Stay open after silence</label>
+                <div class="ctl"><input type="range" id="hold" min="0.4" max="4" step="0.2" value="1.6"><span class="value" id="holdV">1.6 s</span></div>
+              </div>
+              <div class="row">
+                <label for="zoom">Close-up on the notch</label>
+                <span class="switch"><input type="checkbox" id="zoom" role="switch"><span></span></span>
+              </div>
+            </div>
+            <p class="hint">Settings are remembered in this browser.</p>
+          </div>
         </div>
       </div>
     </div>
-    <div class="base" aria-hidden="true"></div>
   </div>
+</section>
 
-  <div class="controls">
-    <div class="group">
-      <span class="group-label" id="srcLabel">Listen to</span>
-      <div class="seg" role="group" aria-labelledby="srcLabel">
-        <button id="btnDemo" aria-pressed="false">
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>Play demo
-        </button>
-        <label class="btn" for="fileInput">
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 11V2.5M4.5 6 8 2.5 11.5 6M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Upload a track
-          <input type="file" id="fileInput" accept="audio/*">
-        </label>
-        <button id="btnMic" aria-pressed="false">
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5" fill="currentColor"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Microphone
-        </button>
-        <button id="btnTab" aria-pressed="false">
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 6h13" stroke="currentColor" stroke-width="1.5"/></svg>Browser tab audio
-        </button>
-        <button id="btnStop" aria-pressed="false">Stop</button>
-      </div>
+<section class="section gutter" id="features">
+  <div class="inner">
+    <div class="section-head">
+      <h2>Designed to disappear.</h2>
+      <p>When nothing is playing, there’s nothing to see.</p>
     </div>
-    <div class="group">
-      <span class="group-label" id="styleLabel">Style</span>
-      <div class="seg" role="group" aria-labelledby="styleLabel" id="styleSeg">
-        <button data-style="glass" aria-pressed="true">Glass</button>
-        <button data-style="aurora" aria-pressed="false">Aurora</button>
-        <button data-style="accent" aria-pressed="false">System Accent</button>
+    <div class="tiles">
+      <div class="tile wide">
+        <span class="kicker">Around the notch, not in it</span>
+        <h3>A shape that continues the notch’s own outline.</h3>
+        <p>The notch is hardware, so no app can draw inside it. NotchWave draws a black shape with the same rounded corners, sized from what macOS reports for your screen. At rest it lines up with the notch exactly. When sound starts it opens on a spring, and it settles back after a short pause.</p>
       </div>
-      <span class="group-label" id="viewLabel">View</span>
-      <div class="seg" role="group" aria-labelledby="viewLabel">
-        <button id="btnZoom" aria-pressed="false">Close-up on the notch</button>
-        <button id="btnSens" aria-pressed="false">Sensitivity: Normal</button>
+      <div class="tile">
+        <span class="kicker">Ways to listen</span>
+        <span class="big">3</span>
+        <p>All computer audio, the microphone, or one app on its own, such as just Spotify.</p>
       </div>
-    </div>
-    <div class="status" aria-live="polite">
-      <span>Source: <strong id="srcName">Preview animation</strong></span>
-      <span class="meter" aria-hidden="true"><i id="meterFill"></i></span>
-      <span class="msg" id="msg"></span>
+      <div class="tile">
+        <span class="kicker">From the vinyl project</span>
+        <h3>Bass at the notch. Treble at the tips.</h3>
+        <p>The frequency layout and line waveforms come from my Max/MSP <a href="https://github.com/atharvabankarsound/vinyl-audio-visualizer">rotating-vinyl visualiser</a>, unrolled along the menu bar.</p>
+      </div>
+      <div class="tile">
+        <span class="kicker">Updates a second</span>
+        <span class="big">94</span>
+        <p>A 2048-point FFT on Apple’s Accelerate framework, drawn every display frame.</p>
+      </div>
+      <div class="tile">
+        <span class="kicker">Private</span>
+        <h3>Nothing is recorded.</h3>
+        <p>Audio is analysed in memory on your Mac and thrown away milliseconds later.</p>
+      </div>
     </div>
   </div>
+</section>
 
-  <main class="story">
-    <section id="how">
-      <h2>It sits around the notch, not in it</h2>
-      <div class="body">
-        <p>The notch is part of the hardware, so no app can draw inside it. NotchWave draws a black shape that continues the notch’s own outline: flat against the top of the screen, with the same rounded lower corners. At rest it lines up exactly with the real notch and disappears. When sound starts it widens on a spring and smooth glass waveforms rise from flat lines, and when the sound stops it settles back after a short pause so it doesn’t flicker between songs.</p>
-        <p>The size comes from macOS itself (the screen’s safe-area inset and the two usable menu bar areas either side), so it fits every notched MacBook. On a display without a notch it grows a virtual one out of nothing while audio plays.</p>
-      </div>
-    </section>
-
-    <section>
-      <h2>From the vinyl to the notch</h2>
-      <div class="body">
-        <p>This follows on from my Max/MSP and Jitter <a href="https://github.com/atharvabankarsound/vinyl-audio-visualizer">rotating-vinyl visualiser</a>, which put low frequencies at the centre of the record and highs at the rim. NotchWave keeps that mapping and unrolls it along the menu bar: bass sits next to the notch and treble reaches out to the tips, mirrored on both sides.</p>
-        <div class="mapping">
-          <figure>
-            <svg viewBox="0 0 240 150" role="img" aria-label="Vinyl: low frequencies at the centre, high frequencies at the rim">
-              <circle cx="120" cy="75" r="62" fill="#14161c" stroke="#2c3038"/>
-              <circle cx="120" cy="75" r="50" fill="none" stroke="#f08fd3" stroke-opacity=".55" stroke-width="5"/>
-              <circle cx="120" cy="75" r="38" fill="none" stroke="#a49bff" stroke-opacity=".6" stroke-width="5"/>
-              <circle cx="120" cy="75" r="26" fill="none" stroke="#62d3e4" stroke-opacity=".75" stroke-width="5"/>
-              <circle cx="120" cy="75" r="6" fill="#0b0d12" stroke="#2c3038"/>
-              <text x="120" y="146" fill="#9aa1ad" font-size="10" text-anchor="middle" font-family="IBM Plex Mono, monospace">LOW → CENTRE · HIGH → RIM</text>
-            </svg>
-            <figcaption>The Max/MSP patch: frequency becomes distance from the centre of the record.</figcaption>
-          </figure>
-          <figure>
-            <svg viewBox="0 0 240 150" role="img" aria-label="Notch: low frequencies beside the notch, high frequencies at the outer tips">
-              <rect x="0" y="0" width="240" height="22" fill="#1c2138"/>
-              <path d="M24 0 Q28 0 28 4 V24 Q28 32 36 32 H204 Q212 32 212 24 V4 Q212 0 216 0 Z" fill="#000"/>
-              <path d="M86 12 Q80 4 72 9 T56 11 T40 12 M86 12 Q80 20 72 15 T56 13 T40 12" fill="none" stroke="#dfe7ff" stroke-width="1.1" stroke-linecap="round"/>
-              <path d="M154 12 Q160 4 168 9 T184 11 T200 12 M154 12 Q160 20 168 15 T184 13 T200 12" fill="none" stroke="#dfe7ff" stroke-width="1.1" stroke-linecap="round"/>
-              <rect x="88" y="0" width="64" height="20" rx="6" fill="#000"/>
-              <text x="120" y="62" fill="#9aa1ad" font-size="10" text-anchor="middle" font-family="IBM Plex Mono, monospace">HIGH ← LOW · NOTCH · LOW → HIGH</text>
-              <text x="120" y="146" fill="#9aa1ad" font-size="10" text-anchor="middle" font-family="IBM Plex Mono, monospace">24 BANDS · 40 Hz – 16 kHz</text>
-            </svg>
-            <figcaption>NotchWave: frequency becomes distance from the notch, mirrored left and right.</figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <h2>Three stages, all on your Mac</h2>
-      <div class="body">
-        <ol class="pipeline">
-          <li><span class="step">1 · Capture</span><h3>Hear the Mac</h3><p><code>AVAudioEngine</code> for the microphone. <code>ScreenCaptureKit</code> for everything the Mac plays, or one app on its own.</p></li>
-          <li><span class="step">2 · Analyse</span><h3>Split the sound</h3><p>A 2048-point FFT with Apple’s Accelerate framework, about 94 times a second, folded into 24 log-spaced bands.</p></li>
-          <li><span class="step">3 · Draw</span><h3>Move like macOS</h3><p>A SwiftUI <code>Canvas</code> redrawn every display frame, with spring physics for the shape and smooth line waveforms with a frosted-glass fill.</p></li>
-        </ol>
-        <p>Nothing is recorded or uploaded. Audio is analysed in memory and thrown away a few milliseconds later.</p>
-      </div>
-    </section>
-
-    <section id="run">
-      <h2>Run it on your Mac</h2>
-      <div class="body">
-        <dl class="facts">
-          <dt>Needs</dt><dd>A Mac on macOS 14 Sonoma or later, and Xcode 15 or later (or its command line tools).</dd>
-          <dt>Works on</dt><dd>Every notched MacBook Air and MacBook Pro. Other displays get a virtual notch.</dd>
-          <dt>Permissions</dt><dd>Microphone, and Screen &amp; System Audio Recording for computer or app audio. macOS asks the first time.</dd>
-        </dl>
+<section class="section gutter get" id="get">
+  <div class="inner">
+    <div class="section-head">
+      <h2>Get NotchWave.</h2>
+      <p>Free and open source. Build it with Xcode in about a minute.</p>
+    </div>
+    <div class="get-grid">
+      <dl class="specs">
+        <dt>macOS</dt><dd>14 Sonoma or later</dd>
+        <dt>Mac</dt><dd>Any notched MacBook Air or MacBook Pro. Other displays get a virtual notch.</dd>
+        <dt>Tools</dt><dd>Xcode 15 or later</dd>
+        <dt>Permissions</dt><dd>Microphone, and Screen &amp; System Audio Recording for computer or app audio</dd>
+      </dl>
+      <div>
         <div class="codeblock">
           <button class="copy" id="copyBtn" type="button">Copy</button>
           <pre id="cmds">git clone https://github.com/atharvabankarsound/notch-audio-visualizer.git
@@ -323,344 +506,322 @@ cd notch-audio-visualizer
 ./scripts/build-app.sh
 open build/NotchWave.app</pre>
         </div>
-        <p>A waveform icon appears in the menu bar. Use it to switch between All Computer Audio, Microphone or a single app, change the style, or quit. To work on the code, open <code>Package.swift</code> in Xcode and press Run.</p>
+        <p class="note">A waveform icon appears in the menu bar. Choose an input there, or open Settings for the same controls as on this page.</p>
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
+</section>
 
-  <footer>
+<footer class="gutter">
+  <div class="inner">
     <span>NotchWave by Atharva Bankar</span>
     <a href="https://github.com/atharvabankarsound/notch-audio-visualizer">github.com/atharvabankarsound/notch-audio-visualizer</a>
-  </footer>
-</div>
+  </div>
+</footer>
 
 <script>
 (() => {
-  // ---------- Notch geometry, in macOS points (14-inch MacBook Pro) ----------
-  const NOTCH_W = 185, NOTCH_H = 32;
-  const MAX_WING = 112, MAX_DROP = 10, EAR = 6, PAD = 4;
-  const VIRTUAL_SCREEN_W = 1200;   // a little closer than real life so the notch reads clearly
+  // ---------- Settings (mirrors the Mac app's Settings window) ----------
+  const DEFAULTS = { style: 'glass', thickness: 1, height: 100, wing: 112, glass: 70, glow: 60, echoes: true, lip: true, release: 5, hold: 1.6, sens: 0, volume: 80, zoom: false };
+  const P = Object.assign({}, DEFAULTS);
+  try { Object.assign(P, JSON.parse(localStorage.getItem('notchwave.settings') || '{}')); } catch (e) {}
+  function save() { try { localStorage.setItem('notchwave.settings', JSON.stringify(P)); } catch (e) {} }
+
+  // ---------- Geometry, in macOS points (14-inch MacBook Pro) ----------
+  const NOTCH_W = 185, NOTCH_H = 32, MAX_DROP = 10, EAR = 6, PAD = 4;
+  const VIRTUAL_SCREEN_W = 1200;
   const BANDS = 24, WAVE = 96;
 
-  const display = document.getElementById('display');
-  const zoomer = document.getElementById('zoomer');
-  const canvas = document.getElementById('notch');
-  const g = canvas.getContext('2d');
-  const menubar = document.getElementById('menubar');
-  const chip = document.getElementById('chip');
-  const meterFill = document.getElementById('meterFill');
-  const srcName = document.getElementById('srcName');
-  const msg = document.getElementById('msg');
-
-  const settings = { style: 'glass', sensIndex: 1, zoom: 1 };
-  const SENS = [{ name: 'Low', db: -6 }, { name: 'Normal', db: 0 }, { name: 'High', db: 9 }];
-
-  let scale = 1;            // CSS px per macOS point
-  let dpr = 1;
+  const $ = id => document.getElementById(id);
+  const display = $('display'), zoomer = $('zoomer'), canvas = $('notch'), g = canvas.getContext('2d');
+  const menubar = $('menubar'), chip = $('chip'), msg = $('msg');
+  let scale = 1, dpr = 1;
 
   function layout() {
     const w = display.clientWidth;
     scale = Math.max(w / VIRTUAL_SCREEN_W, 0.36);
-    dpr = Math.min(window.devicePixelRatio || 1, 3) * settings.zoom;
-    const mbH = NOTCH_H * scale;
-    menubar.style.height = mbH + 'px';
+    const zoom = P.zoom ? 2.4 : 1;
+    dpr = Math.min(window.devicePixelRatio || 1, 3) * zoom;
+    zoomer.style.transform = P.zoom ? `scale(${zoom})` : '';
+    menubar.style.height = (NOTCH_H * scale) + 'px';
     menubar.style.fontSize = (13 * scale) + 'px';
     const gap = Math.max(14 * scale, 5);
-    for (const el of menubar.querySelectorAll('.left > *, .right > *')) { el.style.marginRight = gap + 'px'; }
+    for (const el of menubar.querySelectorAll('.left > *, .right > *')) el.style.marginRight = gap + 'px';
     menubar.querySelector('.left').style.paddingLeft = (16 * scale) + 'px';
     menubar.querySelector('.right').style.paddingRight = (4 * scale) + 'px';
     for (const s of menubar.querySelectorAll('svg')) {
-      const base = Number(s.getAttribute('width')) || 15;
-      s.style.width = (base * scale) + 'px'; s.style.height = (15 * scale) + 'px';
+      s.style.width = ((Number(s.getAttribute('width')) || 15) * scale) + 'px';
+      s.style.height = (15 * scale) + 'px';
     }
-    // hide left menus that would collide with the wing on narrow screens
-    const leftLimit = w / 2 - (NOTCH_W / 2 + MAX_WING + EAR + 8) * scale;
+    const reach = (NOTCH_W / 2 + P.wing + EAR + 8) * scale;
     for (const el of menubar.querySelectorAll('.left > span')) {
       el.style.visibility = 'visible';
-      if (el.offsetLeft + el.offsetWidth > leftLimit) el.style.visibility = 'hidden';
+      if (el.offsetLeft + el.offsetWidth > w / 2 - reach) el.style.visibility = 'hidden';
     }
-    const rightLimit = w / 2 + (NOTCH_W / 2 + MAX_WING + EAR + 8) * scale;
-    for (const el of menubar.querySelectorAll('.right > span')) {
-      el.style.visibility = el.offsetLeft < rightLimit ? 'hidden' : 'visible';
-    }
-    const cssW = w;
+    for (const el of menubar.querySelectorAll('.right > span')) el.style.visibility = el.offsetLeft < w / 2 + reach ? 'hidden' : 'visible';
     const cssH = (NOTCH_H + MAX_DROP + PAD) * scale;
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = w + 'px'; canvas.style.height = cssH + 'px';
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(cssH * dpr);
   }
   new ResizeObserver(layout).observe(display);
 
-  // ---------- Clock ----------
-  const clock = document.getElementById('clock');
   function tickClock() {
     const d = new Date();
-    const day = d.toLocaleDateString('en-GB', { weekday: 'short' });
-    const date = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    clock.textContent = `${day} ${date} ${time}`;
+    $('clock').textContent = `${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
   }
   tickClock(); setInterval(tickClock, 15000);
 
-  // ---------- Audio ----------
-  let ac = null, analyser = null, freq = null, timeData = null;
-  let current = null;        // { name, stop() }
+  // ---------- Audio graph ----------
+  let ac = null, analyser = null, master = null, freq = null, timeData = null;
+  let src = null;     // { kind, title, sub, live, play, pause, playing, duration, position, seek, stop }
+  let started = false;
 
   function ensureAudio() {
     if (!ac) {
       ac = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = ac.createAnalyser();
-      analyser.fftSize = 2048;
-      analyser.smoothingTimeConstant = 0;     // smoothing happens in the renderer, like the Mac app
-      freq = new Float32Array(analyser.frequencyBinCount);
-      timeData = new Float32Array(analyser.fftSize);
+      analyser = ac.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0;
+      master = ac.createGain(); master.gain.value = P.volume / 100; master.connect(ac.destination);
+      freq = new Float32Array(analyser.frequencyBinCount); timeData = new Float32Array(analyser.fftSize);
     }
     if (ac.state === 'suspended') ac.resume();
   }
 
-  function setPressed(id) {
-    for (const b of ['btnDemo', 'btnMic', 'btnTab']) document.getElementById(b).setAttribute('aria-pressed', String(b === id));
+  function setSource(s) {
+    if (src) { try { src.stop(); } catch (e) {} }
+    src = s; started = true; chip.hidden = true; msg.textContent = ''; msg.className = 'hint';
+    for (const b of document.querySelectorAll('#inputSeg button')) b.setAttribute('aria-pressed', String(!!s && b.dataset.src === s.kind));
+    refreshNowPlaying(true);
   }
-  function say(text) { msg.textContent = text || ''; }
+  function warn(text) { msg.textContent = text; msg.className = 'hint warn'; }
 
-  function stopSource() {
-    if (current) { try { current.stop(); } catch (e) {} }
-    current = null;
-    setPressed(null);
-    srcName.textContent = 'Nothing (stopped)';
-    chip.textContent = 'Stopped · watch the notch settle back';
-    chip.hidden = false;
-  }
-
-  function begin(name, btnId, stop) {
-    current = { name, stop };
-    setPressed(btnId);
-    srcName.textContent = name;
-    chip.hidden = true;
-    say('');
-  }
-
-  // A small original loop so the demo works without any permissions.
-  function startDemo() {
-    ensureAudio(); stopSource();
-    const out = ac.createGain(); out.gain.value = 0.55;
-    out.connect(analyser); out.connect(ac.destination);
+  // Demo: a small original loop, seekable and pausable, so the page works without permissions.
+  function makeDemo() {
+    ensureAudio();
+    const out = ac.createGain(); out.gain.value = 0.55; out.connect(analyser); out.connect(master);
     const noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
     const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
     const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
-    const bpm = 108, step16 = 60 / bpm / 4;
-    const chords = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];  // Am F C G
+    const bpm = 108, step16 = 60 / bpm / 4, steps = 16 * 8, length = steps * step16;
+    const chords = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];
     const bassLine = [45, 0, 45, 57, 0, 45, 52, 0, 45, 0, 57, 45, 0, 55, 52, 0];
-    let stepIndex = 0, nextTime = ac.currentTime + 0.08;
+    let stepIndex = 0, nextTime = 0, timer = null, playing = false;
 
-    function env(gainNode, t, peak, attack, decay) {
-      gainNode.gain.setValueAtTime(0.0001, t);
-      gainNode.gain.exponentialRampToValueAtTime(peak, t + attack);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, t + attack + decay);
-    }
-    function kick(t) {
-      const o = ac.createOscillator(), v = ac.createGain();
-      o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.13);
-      env(v, t, 0.9, 0.003, 0.32); o.connect(v).connect(out); o.start(t); o.stop(t + 0.4);
-    }
-    function noise(t, type, f, peak, decay) {
-      const s = ac.createBufferSource(); s.buffer = noiseBuf;
-      const fl = ac.createBiquadFilter(); fl.type = type; fl.frequency.value = f;
-      const v = ac.createGain(); env(v, t, peak, 0.002, decay);
-      s.connect(fl).connect(v).connect(out); s.start(t, Math.random() * 0.5); s.stop(t + decay + 0.05);
-    }
-    function bass(t, m) {
-      const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m);
-      const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.Q.value = 5;
-      fl.frequency.setValueAtTime(900, t); fl.frequency.exponentialRampToValueAtTime(180, t + 0.2);
-      const v = ac.createGain(); env(v, t, 0.32, 0.005, 0.22);
-      o.connect(fl).connect(v).connect(out); o.start(t); o.stop(t + 0.3);
-    }
+    const env = (v, t, peak, a, d) => { v.gain.setValueAtTime(0.0001, t); v.gain.exponentialRampToValueAtTime(peak, t + a); v.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
+    function kick(t) { const o = ac.createOscillator(), v = ac.createGain(); o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.13); env(v, t, 0.9, 0.003, 0.32); o.connect(v).connect(out); o.start(t); o.stop(t + 0.4); }
+    function noise(t, type, f, peak, d) { const s = ac.createBufferSource(); s.buffer = noiseBuf; const fl = ac.createBiquadFilter(); fl.type = type; fl.frequency.value = f; const v = ac.createGain(); env(v, t, peak, 0.002, d); s.connect(fl).connect(v).connect(out); s.start(t, Math.random() * 0.5); s.stop(t + d + 0.05); }
+    function bass(t, m) { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.Q.value = 5; fl.frequency.setValueAtTime(900, t); fl.frequency.exponentialRampToValueAtTime(180, t + 0.2); const v = ac.createGain(); env(v, t, 0.32, 0.005, 0.22); o.connect(fl).connect(v).connect(out); o.start(t); o.stop(t + 0.3); }
     function pad(t, notes, dur) {
       for (const m of notes) for (const det of [-8, 8]) {
         const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m + 12); o.detune.value = det;
-        const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = 1500;
-        const v = ac.createGain();
-        v.gain.setValueAtTime(0.0001, t); v.gain.exponentialRampToValueAtTime(0.03, t + 0.5);
-        v.gain.setValueAtTime(0.03, t + dur - 0.4); v.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = 1500; const v = ac.createGain();
+        v.gain.setValueAtTime(0.0001, t); v.gain.exponentialRampToValueAtTime(0.03, t + 0.5); v.gain.setValueAtTime(0.03, t + dur - 0.4); v.gain.exponentialRampToValueAtTime(0.0001, t + dur);
         o.connect(fl).connect(v).connect(out); o.start(t); o.stop(t + dur + 0.05);
       }
     }
-    function pluck(t, m) {
-      const o = ac.createOscillator(); o.type = 'triangle'; o.frequency.value = mtof(m);
-      const v = ac.createGain(); env(v, t, 0.13, 0.004, 0.2);
-      o.connect(v).connect(out); o.start(t); o.stop(t + 0.3);
-    }
+    function pluck(t, m) { const o = ac.createOscillator(); o.type = 'triangle'; o.frequency.value = mtof(m); const v = ac.createGain(); env(v, t, 0.13, 0.004, 0.2); o.connect(v).connect(out); o.start(t); o.stop(t + 0.3); }
     function schedule() {
       while (nextTime < ac.currentTime + 0.12) {
         const s = stepIndex % 16, bar = Math.floor(stepIndex / 16) % 4;
         if (s % 4 === 0) kick(nextTime);
         if (s === 4 || s === 12) noise(nextTime, 'bandpass', 1800, 0.5, 0.16);
         if (s % 2 === 1) noise(nextTime, 'highpass', 7500, s % 4 === 3 ? 0.22 : 0.12, s % 4 === 3 ? 0.14 : 0.05);
-        if (bassLine[s]) bass(nextTime, bassLine[s] + (bar === 1 ? -4 : bar === 2 ? -9 : bar === 3 ? -2 : 0));
+        if (bassLine[s]) bass(nextTime, bassLine[s] + [0, -4, -9, -2][bar]);
         if (s === 0) pad(nextTime, chords[bar], step16 * 16);
-        if (s % 2 === 0 && Math.random() < 0.7) {
-          const c = chords[bar]; pluck(nextTime, c[Math.floor(Math.random() * 3)] + 24);
-        }
-        nextTime += step16; stepIndex++;
+        if (s % 2 === 0 && Math.random() < 0.7) pluck(nextTime, chords[bar][Math.floor(Math.random() * 3)] + 24);
+        nextTime += step16; stepIndex = (stepIndex + 1) % steps;
       }
     }
-    schedule();
-    const timer = setInterval(schedule, 25);
-    begin('Demo loop', 'btnDemo', () => {
-      clearInterval(timer);
-      out.gain.setTargetAtTime(0.0001, ac.currentTime, 0.05);
-      setTimeout(() => out.disconnect(), 400);
-    });
+    return {
+      kind: 'demo', title: 'Glass Hour', sub: 'NotchWave demo loop · 108 BPM', live: false,
+      play() { ensureAudio(); if (playing) return; playing = true; nextTime = ac.currentTime + 0.05; schedule(); timer = setInterval(schedule, 25); },
+      pause() { playing = false; clearInterval(timer); },
+      playing: () => playing,
+      duration: () => length,
+      position: () => stepIndex * step16,
+      seek(t) { stepIndex = Math.max(0, Math.min(steps - 1, Math.floor(t / step16))); if (playing) nextTime = ac.currentTime + 0.05; },
+      stop() { this.pause(); out.gain.setTargetAtTime(0.0001, ac.currentTime, 0.05); setTimeout(() => out.disconnect(), 400); }
+    };
   }
 
-  function startFile(file) {
-    ensureAudio(); stopSource();
+  function makeTrack(file) {
+    ensureAudio();
     const url = URL.createObjectURL(file);
-    const el = new Audio(); el.src = url; el.crossOrigin = 'anonymous';
-    const node = ac.createMediaElementSource(el);
-    node.connect(analyser); node.connect(ac.destination);
-    el.play().catch(() => say('The track could not play. Try an MP3, AAC, WAV or FLAC file.'));
-    el.addEventListener('ended', () => { if (current && current.el === el) stopSource(); });
-    begin(file.name, null, () => { el.pause(); node.disconnect(); URL.revokeObjectURL(url); });
-    current.el = el;
+    const el = new Audio(); el.src = url;
+    const node = ac.createMediaElementSource(el); node.connect(analyser); node.connect(master);
+    el.addEventListener('ended', () => refreshNowPlaying(true));
+    el.addEventListener('loadedmetadata', () => refreshNowPlaying(true));
+    return {
+      kind: 'file', title: file.name.replace(/\.[^.]+$/, ''), sub: 'Uploaded track', live: false,
+      play() { ensureAudio(); el.play().catch(() => warn('This track can’t be played. Try an MP3, AAC, WAV or FLAC file.')); },
+      pause() { el.pause(); },
+      playing: () => !el.paused && !el.ended,
+      duration: () => (isFinite(el.duration) ? el.duration : 0),
+      position: () => el.currentTime,
+      seek(t) { el.currentTime = t; },
+      stop() { el.pause(); node.disconnect(); URL.revokeObjectURL(url); }
+    };
   }
 
-  async function startMic() {
-    ensureAudio();
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-      stopSource();
-      const node = ac.createMediaStreamSource(stream);
-      node.connect(analyser);                 // not to the speakers: no feedback
-      begin('Microphone', 'btnMic', () => { node.disconnect(); stream.getTracks().forEach(t => t.stop()); });
-    } catch (e) {
-      say('This page can’t reach your microphone here. It works on the GitHub Pages version of the site, or try the demo loop or upload a track.');
-    }
+  function makeLive(kind, stream, title, sub) {
+    const node = ac.createMediaStreamSource(stream);
+    let playing = false;
+    stream.getTracks().forEach(t => t.addEventListener('ended', () => { if (src && src.kind === kind) setSource(null); }));
+    return {
+      kind, title, sub, live: true,
+      play() { ensureAudio(); if (!playing) { node.connect(analyser); playing = true; } },   // never to the speakers: no feedback
+      pause() { if (playing) { node.disconnect(); playing = false; } },
+      playing: () => playing,
+      duration: () => 0, position: () => 0, seek() {},
+      stop() { this.pause(); stream.getTracks().forEach(t => t.stop()); }
+    };
   }
 
-  async function startTab() {
+  async function choose(kind) {
+    if (kind === 'demo') { const s = makeDemo(); setSource(s); s.play(); return; }
+    if (kind === 'file') { $('fileInput').click(); return; }
     ensureAudio();
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-      if (!stream.getAudioTracks().length) {
-        stream.getTracks().forEach(t => t.stop());
-        say('No audio came through. Pick a browser tab and turn on “Share tab audio” in the sharing dialog.');
-        return;
+      if (kind === 'mic') {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+        const s = makeLive('mic', stream, 'Microphone', 'Live input'); setSource(s); s.play();
+      } else {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        if (!stream.getAudioTracks().length) { stream.getTracks().forEach(t => t.stop()); warn('No audio came through. Choose a browser tab and turn on “Share tab audio”.'); return; }
+        const audioOnly = new MediaStream(stream.getAudioTracks());
+        const s = makeLive('tab', audioOnly, 'Tab Audio', 'Shared from a browser tab');
+        stream.getVideoTracks().forEach(t => t.stop());
+        setSource(s); s.play();
       }
-      stopSource();
-      const node = ac.createMediaStreamSource(new MediaStream(stream.getAudioTracks()));
-      node.connect(analyser);
-      stream.getTracks().forEach(t => t.addEventListener('ended', () => { if (current && current.stream === stream) stopSource(); }));
-      begin('Browser tab', 'btnTab', () => { node.disconnect(); stream.getTracks().forEach(t => t.stop()); });
-      current.stream = stream;
     } catch (e) {
-      say('Tab audio isn’t available here. It works in Chrome or Edge on the GitHub Pages version of the site. The Mac app captures any app directly.');
+      warn(kind === 'mic'
+        ? 'The microphone isn’t available on this page. It works on the GitHub Pages version of the site.'
+        : 'Tab audio isn’t available here. It works in Chrome or Edge on the GitHub Pages version of the site.');
     }
   }
 
-  document.getElementById('btnDemo').addEventListener('click', startDemo);
-  document.getElementById('btnMic').addEventListener('click', startMic);
-  document.getElementById('btnTab').addEventListener('click', startTab);
-  document.getElementById('btnStop').addEventListener('click', stopSource);
-  document.getElementById('fileInput').addEventListener('change', e => {
+  for (const b of document.querySelectorAll('#inputSeg button')) b.addEventListener('click', () => choose(b.dataset.src));
+  $('fileInput').addEventListener('change', e => {
     const f = e.target.files && e.target.files[0];
-    if (f) startFile(f);
+    if (f) { const s = makeTrack(f); setSource(s); s.play(); }
     e.target.value = '';
   });
 
-  for (const b of document.querySelectorAll('#styleSeg button')) {
-    b.addEventListener('click', () => {
-      settings.style = b.dataset.style;
-      for (const o of document.querySelectorAll('#styleSeg button')) o.setAttribute('aria-pressed', String(o === b));
+  // ---------- Now Playing ----------
+  const seek = $('seek'), playPause = $('playPause'), back = $('back'), fwd = $('fwd');
+  const fmt = t => { t = Math.max(0, Math.floor(t)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+  let seeking = false, lastPlaying = null;
+  function setFill(input) {
+    const min = Number(input.min), max = Number(input.max), v = Number(input.value);
+    input.style.setProperty('--p', ((v - min) / (max - min) * 100) + '%');
+  }
+  function refreshNowPlaying(force) {
+    const playing = !!(src && src.playing());
+    if (force || playing !== lastPlaying) {
+      lastPlaying = playing;
+      $('npTitle').textContent = src ? src.title : 'Not playing';
+      $('npSub').textContent = src ? src.sub : 'Choose an input, or press play for the demo';
+      $('ppIcon').innerHTML = playing ? '<path d="M6.5 4.5h3.8v15H6.5zM13.7 4.5h3.8v15h-3.8z" fill="currentColor"/>' : '<path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/>';
+      playPause.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+      const seekable = !!(src && !src.live && src.duration() > 0);
+      seek.disabled = !seekable; back.disabled = !seekable; fwd.disabled = !seekable;
+      if (!seekable) { seek.value = 0; setFill(seek); $('tNow').textContent = src && src.live ? 'Live' : '0:00'; $('tEnd').textContent = src && src.live ? '' : '--:--'; }
+    }
+    if (src && !src.live && src.duration() > 0 && !seeking) {
+      const d = src.duration(), p = src.position();
+      seek.value = Math.round(p / d * 1000); setFill(seek);
+      $('tNow').textContent = fmt(p); $('tEnd').textContent = '-' + fmt(d - p);
+    }
+  }
+  playPause.addEventListener('click', () => {
+    if (!src) { choose('demo'); return; }
+    if (src.playing()) src.pause(); else src.play();
+    refreshNowPlaying(true);
+  });
+  back.addEventListener('click', () => { if (src) src.seek(Math.max(0, src.position() - 10)); });
+  fwd.addEventListener('click', () => { if (src) src.seek(Math.min(src.duration() - 0.1, src.position() + 10)); });
+  seek.addEventListener('input', () => { seeking = true; setFill(seek); if (src) $('tNow').textContent = fmt(seek.value / 1000 * src.duration()); });
+  seek.addEventListener('change', () => { if (src) src.seek(seek.value / 1000 * src.duration()); seeking = false; });
+
+  // ---------- Settings controls ----------
+  const sliders = {
+    thickness: v => v.toFixed(1) + ' pt', height: v => v + '%', wing: v => v + ' pt', glass: v => v + '%',
+    glow: v => v + '%', release: v => String(v), hold: v => v.toFixed(1) + ' s', sens: v => (v > 0 ? '+' : '') + v + ' dB', volume: null
+  };
+  for (const [id, label] of Object.entries(sliders)) {
+    const input = $(id);
+    input.value = P[id]; setFill(input);
+    if (label) $(id + 'V').textContent = label(Number(P[id]));
+    input.addEventListener('input', () => {
+      P[id] = Number(input.value); setFill(input);
+      if (label) $(id + 'V').textContent = label(P[id]);
+      if (id === 'volume' && master) master.gain.setTargetAtTime(P.volume / 100, ac.currentTime, 0.02);
+      if (id === 'wing') layout();
+      save();
     });
   }
-  const btnZoom = document.getElementById('btnZoom');
-  btnZoom.addEventListener('click', () => {
-    settings.zoom = settings.zoom === 1 ? 2.4 : 1;
-    btnZoom.setAttribute('aria-pressed', String(settings.zoom !== 1));
-    zoomer.style.transform = settings.zoom === 1 ? '' : `scale(${settings.zoom})`;
-    layout();
-  });
-  const btnSens = document.getElementById('btnSens');
-  btnSens.addEventListener('click', () => {
-    settings.sensIndex = (settings.sensIndex + 1) % SENS.length;
-    btnSens.textContent = 'Sensitivity: ' + SENS[settings.sensIndex].name;
-  });
+  setFill(seek);
+  for (const id of ['echoes', 'lip', 'zoom']) {
+    const input = $(id); input.checked = !!P[id];
+    input.addEventListener('change', () => { P[id] = input.checked; if (id === 'zoom') layout(); save(); });
+  }
+  function paintSwatches() { for (const b of document.querySelectorAll('#swatches .swatch')) b.setAttribute('aria-pressed', String(b.dataset.style === P.style)); }
+  for (const b of document.querySelectorAll('#swatches .swatch')) b.addEventListener('click', () => { P.style = b.dataset.style; paintSwatches(); save(); });
+  paintSwatches();
 
-  const copyBtn = document.getElementById('copyBtn');
-  copyBtn.addEventListener('click', () => {
-    const text = document.getElementById('cmds').textContent;
-    const done = () => { copyBtn.textContent = 'Copied'; setTimeout(() => copyBtn.textContent = 'Copy', 1600); };
-    const fallback = () => {
-      const r = document.createRange(); r.selectNodeContents(document.getElementById('cmds'));
-      const s = getSelection(); s.removeAllRanges(); s.addRange(r); copyBtn.textContent = 'Selected';
-    };
-    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  $('copyBtn').addEventListener('click', () => {
+    const btn = $('copyBtn'), text = $('cmds').textContent;
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents($('cmds')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected'; };
+    try { navigator.clipboard.writeText(text).then(() => { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1600); }, fallback); } catch (e) { fallback(); }
   });
 
   // ---------- Analysis: same band layout as the Swift analyser ----------
   const snap = { bands: new Float32Array(BANDS), wave: new Float32Array(WAVE), level: 0 };
 
   function analyseLive() {
-    analyser.getFloatFrequencyData(freq);
-    analyser.getFloatTimeDomainData(timeData);
+    analyser.getFloatFrequencyData(freq); analyser.getFloatTimeDomainData(timeData);
     const n = timeData.length;
     let sum = 0; for (let i = 0; i < n; i++) sum += timeData[i] * timeData[i];
     snap.level = Math.sqrt(sum / n);
     const span = 512, stepW = span / WAVE;
     for (let i = 0; i < WAVE; i++) snap.wave[i] = timeData[n - span + i * stepW];
-
     const binW = ac.sampleRate / analyser.fftSize, half = freq.length;
-    const minHz = 40, maxHz = 16000;
     // Web Audio reports ~13.5 dB lower than the Mac analyser's scale, so the window shifts down.
-    const floorDB = -86, ceilDB = -26, tilt = 15, gain = SENS[settings.sensIndex].db;
+    const floorDB = -86, ceilDB = -26, tilt = 15;
     for (let b = 0; b < BANDS; b++) {
       const t0 = b / BANDS, t1 = (b + 1) / BANDS;
-      let lo = Math.floor(minHz * Math.pow(maxHz / minHz, t0) / binW);
-      let hi = Math.floor(minHz * Math.pow(maxHz / minHz, t1) / binW);
+      let lo = Math.floor(40 * Math.pow(400, t0) / binW), hi = Math.floor(40 * Math.pow(400, t1) / binW);
       lo = Math.max(1, Math.min(lo, half - 1)); hi = Math.max(lo + 1, Math.min(hi, half));
       let peak = -Infinity; for (let k = lo; k < hi; k++) if (freq[k] > peak) peak = freq[k];
-      const db = peak + tilt * t0 + gain;
-      snap.bands[b] = Math.min(1, Math.max(0, (db - floorDB) / (ceilDB - floorDB)));
+      snap.bands[b] = Math.min(1, Math.max(0, (peak + tilt * t0 + P.sens - floorDB) / (ceilDB - floorDB)));
     }
   }
 
-  // Before anyone presses play: a looping preview (8 s on, 2.5 s quiet) so the page shows what it does.
   function analysePreview(t) {
-    const cycle = t % 10.5, on = cycle < 8;
+    const on = (t % 10.5) < 8;
     const beat = Math.pow(Math.max(0, Math.cos((t * 108 / 60) * Math.PI)), 6);
     for (let b = 0; b < BANDS; b++) {
       const u = b / (BANDS - 1);
       const base = 0.62 - 0.32 * u + 0.18 * Math.sin(t * 2.3 + b * 0.55) + 0.1 * Math.sin(t * 5.1 - b * 1.3);
-      const kick = u < 0.25 ? beat * 0.35 : u > 0.7 ? beat * 0.12 : 0;
-      snap.bands[b] = on ? Math.max(0, Math.min(1, base + kick)) : 0;
+      snap.bands[b] = on ? Math.max(0, Math.min(1, base + (u < 0.25 ? beat * 0.35 : u > 0.7 ? beat * 0.12 : 0))) : 0;
     }
-    for (let i = 0; i < WAVE; i++) {
-      snap.wave[i] = on ? 0.18 * Math.sin(i * 0.35 + t * 9) * (0.6 + 0.4 * Math.sin(i * 0.07 + t * 1.7)) + 0.12 * beat * Math.sin(i * 0.12) : 0;
-    }
+    for (let i = 0; i < WAVE; i++) snap.wave[i] = on ? 0.18 * Math.sin(i * 0.35 + t * 9) * (0.6 + 0.4 * Math.sin(i * 0.07 + t * 1.7)) + 0.12 * beat * Math.sin(i * 0.12) : 0;
     snap.level = on ? 0.1 : 0;
   }
 
   // ---------- Renderer: a port of NotchVisualizerView.swift ----------
-  // Waveforms are drawn as smooth line strips (like the jit.gl.mesh line_strip grooves in the
-  // vinyl patch), with two slower "echo" lines behind them and a frosted-glass fill.
-  const R = {
-    bands: new Float32Array(BANDS), echo1: new Float32Array(BANDS), echo2: new Float32Array(BANDS),
-    wave: new Float32Array(WAVE), e: 0, v: 0, last: null, loud: -Infinity
-  };
+  const R = { bands: new Float32Array(BANDS), echo1: new Float32Array(BANDS), echo2: new Float32Array(BANDS), wave: new Float32Array(WAVE), e: 0, v: 0, last: null, loud: -Infinity };
 
   function step(now) {
     const dt = Math.min(Math.max(now - (R.last ?? now), 0), 1 / 30);
     R.last = now;
     if (snap.level > 0.0025) R.loud = now;
-    const target = (now - R.loud) < 1.6 ? 1 : 0;
+    const target = (now - R.loud) < P.hold ? 1 : 0;
     const a = 170 * (target - R.e) - 19 * R.v;
     R.v += a * dt; R.e += R.v * dt;
+    const release = 12 - P.release, attack = 34 - P.release * 2;   // more smoothing = slower response
     const k1 = 1 - Math.exp(-5 * dt), k2 = 1 - Math.exp(-2.5 * dt);
     for (let i = 0; i < BANDS; i++) {
-      const goal = snap.bands[i], rate = goal > R.bands[i] ? 24 : 6;
+      const goal = snap.bands[i], rate = goal > R.bands[i] ? attack : release;
       R.bands[i] += (goal - R.bands[i]) * (1 - Math.exp(-rate * dt));
       R.echo1[i] += (R.bands[i] - R.echo1[i]) * k1;
       R.echo2[i] += (R.echo1[i] - R.echo2[i]) * k2;
@@ -668,156 +829,148 @@ open build/NotchWave.app</pre>
     for (let i = 0; i < WAVE; i++) R.wave[i] += (snap.wave[i] - R.wave[i]) * (1 - Math.exp(-30 * dt));
   }
 
-  // Tint stops from the notch edge (bass) out to the tip (treble), per style.
+  const accentNow = () => getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#0071e3';
+  function hexA(hex, a) { const h = hex.replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }
+  let accentHex = accentNow();
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  if (mq.addEventListener) mq.addEventListener('change', () => { accentHex = accentNow(); });
+  new MutationObserver(() => { accentHex = accentNow(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
   function tintStops(alpha) {
-    if (settings.style === 'aurora') return [[0, 120, 232, 240], [0.5, 182, 168, 255], [1, 255, 156, 214]].map(s => [s[0], `rgba(${s[1]},${s[2]},${s[3]},${alpha})`]);
-    if (settings.style === 'accent') return [[0, `rgba(10,132,255,${alpha})`], [1, `rgba(110,185,255,${alpha})`]];
+    if (P.style === 'aurora') return [[0, `rgba(120,232,240,${alpha})`], [0.5, `rgba(182,168,255,${alpha})`], [1, `rgba(255,156,214,${alpha})`]];
+    if (P.style === 'accent') return [[0, hexA(accentHex, alpha)], [1, `rgba(150,200,255,${alpha})`]];
     return [[0, `rgba(240,244,255,${alpha})`], [1, `rgba(214,224,245,${alpha})`]];
   }
-  function tint(xNear, xFar, alpha) {
-    const grad = g.createLinearGradient(xNear, 0, xFar, 0);
-    for (const [o, c] of tintStops(alpha)) grad.addColorStop(o, c);
-    return grad;
-  }
-
-  function radius(e) { return 9 + 3 * Math.min(1, e); }
+  function tint(x0, x1, alpha) { const gr = g.createLinearGradient(x0, 0, x1, 0); for (const [o, c] of tintStops(alpha)) gr.addColorStop(o, c); return gr; }
+  const radius = e => 9 + 3 * Math.min(1, e);
 
   function islandPath(x0, x1, bottom, e) {
     const r = radius(e), k = 0.45;
-    g.beginPath();
-    g.moveTo(x0 - EAR, 0);
+    g.beginPath(); g.moveTo(x0 - EAR, 0);
     g.bezierCurveTo(x0 - EAR * k, 0, x0, EAR * (1 - k), x0, EAR);
-    g.lineTo(x0, bottom - r);
-    g.bezierCurveTo(x0, bottom - r * k, x0 + r * k, bottom, x0 + r, bottom);
-    g.lineTo(x1 - r, bottom);
-    g.bezierCurveTo(x1 - r * k, bottom, x1, bottom - r * k, x1, bottom - r);
-    g.lineTo(x1, EAR);
-    g.bezierCurveTo(x1, EAR * (1 - k), x1 + EAR * k, 0, x1 + EAR, 0);
+    g.lineTo(x0, bottom - r); g.bezierCurveTo(x0, bottom - r * k, x0 + r * k, bottom, x0 + r, bottom);
+    g.lineTo(x1 - r, bottom); g.bezierCurveTo(x1 - r * k, bottom, x1, bottom - r * k, x1, bottom - r);
+    g.lineTo(x1, EAR); g.bezierCurveTo(x1, EAR * (1 - k), x1 + EAR * k, 0, x1 + EAR, 0);
     g.closePath();
   }
-
-  // Smooth curve through points (midpoint quadratic smoothing).
   function smooth(pts, move) {
     if (move) g.moveTo(pts[0][0], pts[0][1]); else g.lineTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length - 1; i++) {
-      g.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
-    }
+    for (let i = 1; i < pts.length - 1; i++) g.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
     const l = pts[pts.length - 1]; g.lineTo(l[0], l[1]);
   }
-
   const ease = t => t * t * (3 - 2 * t);
 
-  // One wing's waveform envelope: half-heights along the wing, bass at the notch edge.
   function envelope(vals, start, end, side, edgeX, midY, maxHalf) {
     const N = 56, top = [], bot = [];
     for (let j = 0; j <= N; j++) {
-      const u = j / N, d = start + u * (end - start);
-      const f = u * (BANDS - 1), i = Math.floor(f), fr = f - i;
+      const u = j / N, d = start + u * (end - start), f = u * (BANDS - 1), i = Math.floor(f), fr = f - i;
       const v = vals[i] * (1 - fr) + vals[Math.min(i + 1, BANDS - 1)] * fr;
-      const taper = ease(Math.min(1, u / 0.1)) * ease(Math.min(1, (1 - u) / 0.22));
-      const h = (0.6 + v * maxHalf) * taper;
+      const h = (0.6 + v * maxHalf) * ease(Math.min(1, u / 0.1)) * ease(Math.min(1, (1 - u) / 0.22));
       const x = edgeX + side * d;
       top.push([x, midY - h]); bot.push([x, midY + h]);
     }
     return { top, bot };
   }
 
-  function drawWing(side, cx, nw, wing, midY, maxHalf, fade) {
-    const edgeX = cx + side * nw / 2;
-    const start = 8, end = wing - 10;
+  function drawWing(side, cx, wing, midY, maxHalf, fade) {
+    const edgeX = cx + side * NOTCH_W / 2, start = 8, end = wing - 10;
     if (end - start < 8) return;
-    const xNear = edgeX + side * start, xFar = edgeX + side * end;
-    const reveal = Math.min(1, (end - start) / 40) * fade;
+    const xn = edgeX + side * start, xf = edgeX + side * end;
+    const reveal = Math.min(1, (end - start) / 40) * fade, th = P.thickness;
 
-    // Echo lines: thin and faint, like older grooves behind the current one.
-    for (const [vals, alpha] of [[R.echo2, 0.16], [R.echo1, 0.3]]) {
+    if (P.echoes) for (const [vals, alpha] of [[R.echo2, 0.16], [R.echo1, 0.3]]) {
       const env = envelope(vals, start, end, side, edgeX, midY, maxHalf);
-      g.beginPath(); smooth(env.top, true);
-      g.moveTo(env.bot[0][0], env.bot[0][1]); smooth(env.bot, true);
-      g.strokeStyle = tint(xNear, xFar, alpha * reveal); g.lineWidth = 0.7; g.stroke();
+      g.beginPath(); smooth(env.top, true); smooth(env.bot, true);
+      g.strokeStyle = tint(xn, xf, alpha * reveal); g.lineWidth = 0.7 * th; g.stroke();
     }
-
     const env = envelope(R.bands, start, end, side, edgeX, midY, maxHalf);
-
-    // Frosted glass body: tinted wash + white sheen that is brighter at the top edge.
-    g.beginPath(); smooth(env.top, true); smooth(env.bot.slice().reverse(), false); g.closePath();
-    g.fillStyle = tint(xNear, xFar, 0.16 * reveal); g.fill();
-    const sheen = g.createLinearGradient(0, midY - maxHalf, 0, midY + maxHalf);
-    sheen.addColorStop(0, `rgba(255,255,255,${0.32 * reveal})`);
-    sheen.addColorStop(0.45, `rgba(255,255,255,${0.05 * reveal})`);
-    sheen.addColorStop(1, `rgba(255,255,255,${0.14 * reveal})`);
-    g.fillStyle = sheen; g.fill();
-
-    // Edges: soft glow, then a crisp hairline on top.
+    const glassAmt = P.glass / 100;
+    if (glassAmt > 0) {
+      g.beginPath(); smooth(env.top, true); smooth(env.bot.slice().reverse(), false); g.closePath();
+      g.fillStyle = tint(xn, xf, 0.22 * glassAmt * reveal); g.fill();
+      const sheen = g.createLinearGradient(0, midY - maxHalf, 0, midY + maxHalf);
+      sheen.addColorStop(0, `rgba(255,255,255,${0.45 * glassAmt * reveal})`);
+      sheen.addColorStop(0.45, `rgba(255,255,255,${0.07 * glassAmt * reveal})`);
+      sheen.addColorStop(1, `rgba(255,255,255,${0.2 * glassAmt * reveal})`);
+      g.fillStyle = sheen; g.fill();
+    }
     g.save();
-    g.shadowColor = settings.style === 'aurora' ? `rgba(160,190,255,${0.55 * reveal})` : settings.style === 'accent' ? `rgba(10,132,255,${0.6 * reveal})` : `rgba(255,255,255,${0.5 * reveal})`;
-    g.shadowBlur = 6 * scale * dpr;
-    g.beginPath(); smooth(env.top, true); g.moveTo(env.bot[0][0], env.bot[0][1]); smooth(env.bot, true);
-    g.strokeStyle = tint(xNear, xFar, 0.95 * reveal); g.lineWidth = 1.1; g.lineCap = 'round'; g.lineJoin = 'round';
-    g.stroke();
+    const glow = P.glow / 100;
+    if (glow > 0) {
+      g.shadowColor = P.style === 'aurora' ? `rgba(160,190,255,${0.7 * glow * reveal})` : P.style === 'accent' ? hexA(accentHex, 0.75 * glow * reveal) : `rgba(255,255,255,${0.65 * glow * reveal})`;
+      g.shadowBlur = 10 * glow * scale * dpr;
+    }
+    g.beginPath(); smooth(env.top, true); smooth(env.bot, true);
+    g.strokeStyle = tint(xn, xf, 0.95 * reveal); g.lineWidth = 1.1 * th; g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke();
     g.restore();
     g.beginPath(); smooth(env.top, true);
-    g.strokeStyle = `rgba(255,255,255,${0.7 * reveal})`; g.lineWidth = 0.45; g.stroke();
+    g.strokeStyle = `rgba(255,255,255,${0.7 * reveal})`; g.lineWidth = 0.4 * th; g.stroke();
   }
 
   function draw() {
-    const W = canvas.width / (scale * dpr);           // canvas width in macOS points
+    const W = canvas.width / (scale * dpr);
     g.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
     g.clearRect(0, 0, W, NOTCH_H + MAX_DROP + PAD);
-
-    const e = Math.max(0, R.e), fade = Math.min(1, e);
-    const cx = W / 2, nw = NOTCH_W, nh = NOTCH_H;
-    const wing = MAX_WING * e, drop = MAX_DROP * e;
-    const x0 = cx - nw / 2 - wing, x1 = cx + nw / 2 + wing, bottom = nh + drop;
-
-    islandPath(x0, x1, bottom, e);
-    g.fillStyle = '#000'; g.fill();
+    const e = Math.max(0, R.e), fade = Math.min(1, e), cx = W / 2, nh = NOTCH_H;
+    const wing = P.wing * e, drop = MAX_DROP * e;
+    const x0 = cx - NOTCH_W / 2 - wing, x1 = cx + NOTCH_W / 2 + wing, bottom = nh + drop;
+    islandPath(x0, x1, bottom, e); g.fillStyle = '#000'; g.fill();
     if (fade < 0.01) return;
 
-    // Glass rim: a faint highlight along the lower edge, brightest at the centre.
     const r = radius(e);
     const rim = g.createLinearGradient(x0, 0, x1, 0);
-    rim.addColorStop(0, 'rgba(255,255,255,0)');
-    rim.addColorStop(0.5, `rgba(255,255,255,${0.22 * fade})`);
-    rim.addColorStop(1, 'rgba(255,255,255,0)');
-    g.beginPath(); g.moveTo(x0 + r, bottom - 0.4); g.lineTo(x1 - r, bottom - 0.4);
-    g.strokeStyle = rim; g.lineWidth = 0.6; g.stroke();
+    rim.addColorStop(0, 'rgba(255,255,255,0)'); rim.addColorStop(0.5, `rgba(255,255,255,${0.22 * fade})`); rim.addColorStop(1, 'rgba(255,255,255,0)');
+    g.beginPath(); g.moveTo(x0 + r, bottom - 0.4); g.lineTo(x1 - r, bottom - 0.4); g.strokeStyle = rim; g.lineWidth = 0.6; g.stroke();
 
-    const midY = nh / 2, maxHalf = Math.max(nh / 2 - 6, 5);
-    drawWing(-1, cx, nw, wing, midY, maxHalf, fade);
-    drawWing(1, cx, nw, wing, midY, maxHalf, fade);
+    const midY = nh / 2, maxHalf = Math.min(nh / 2 - 2, Math.max(nh / 2 - 6, 5) * P.height / 100);
+    drawWing(-1, cx, wing, midY, maxHalf, fade);
+    drawWing(1, cx, wing, midY, maxHalf, fade);
 
-    // Time-domain lip under the notch, mirrored from the centre outwards.
-    if (drop <= 2) return;
+    if (!P.lip || drop <= 2) return;
     const left = x0 + r + 4, right = x1 - r - 4, halfSpan = (right - left) / 2;
     if (halfSpan <= 4) return;
-    const baseline = nh + drop * 0.45, amp = drop * 0.38;
-    const pts = [];
+    const baseline = nh + drop * 0.45, amp = drop * 0.38 * Math.min(1.3, P.height / 100), pts = [];
     for (let x = left; x <= right; x += 2) {
-      const u = Math.abs(x - cx) / halfSpan;
-      const idx = Math.min(WAVE - 1, Math.floor(u * (WAVE - 1)));
-      const taper = Math.sin(Math.PI * (1 - Math.min(u, 1)) / 2);
-      const s = Math.max(-1, Math.min(1, R.wave[idx] * 2.5));
-      pts.push([x, baseline + s * amp * taper]);
+      const u = Math.min(1, Math.abs(x - cx) / halfSpan), idx = Math.min(WAVE - 1, Math.floor(u * (WAVE - 1)));
+      pts.push([x, baseline + Math.max(-1, Math.min(1, R.wave[idx] * 2.5)) * amp * Math.sin(Math.PI * (1 - u) / 2)]);
     }
     if (pts.length < 3) return;
-    const lip = g.createLinearGradient(left, 0, right, 0);
-    const stops = tintStops(0.75 * fade);
-    lip.addColorStop(0, stops[stops.length - 1][1].replace(/[\d.]+\)$/, '0)'));
-    lip.addColorStop(0.5, stops[0][1]);
-    lip.addColorStop(1, stops[stops.length - 1][1].replace(/[\d.]+\)$/, '0)'));
-    g.beginPath(); smooth(pts, true);
-    g.strokeStyle = lip; g.lineWidth = 0.9; g.lineJoin = 'round'; g.stroke();
+    const stops = tintStops(0.75 * fade), lip = g.createLinearGradient(left, 0, right, 0);
+    const clear = stops[stops.length - 1][1].replace(/[\d.]+\)$/, '0)');
+    lip.addColorStop(0, clear); lip.addColorStop(0.5, stops[0][1]); lip.addColorStop(1, clear);
+    g.beginPath(); smooth(pts, true); g.strokeStyle = lip; g.lineWidth = 0.9 * P.thickness; g.lineJoin = 'round'; g.stroke();
   }
 
+  // Small live artwork for the Now Playing card.
+  const art = $('art'), ag = art.getContext('2d');
+  function drawArt() {
+    ag.clearRect(0, 0, 112, 112);
+    ag.strokeStyle = 'rgba(255,255,255,0.9)'; ag.lineWidth = 2.2; ag.lineCap = 'round'; ag.lineJoin = 'round';
+    const sets = [R.echo2, R.echo1, R.bands], alphas = [0.2, 0.45, 1];
+    for (let k = 0; k < 3; k++) {
+      ag.globalAlpha = alphas[k];
+      for (const sign of [-1, 1]) {
+        ag.beginPath();
+        for (let x = 14; x <= 98; x += 3) {
+          const u = (x - 14) / 84, i = Math.min(BANDS - 1, Math.floor(Math.abs(u - 0.5) * 2 * (BANDS - 1)));
+          const y = 56 + sign * (1 + sets[k][i] * 26) * Math.sin(Math.PI * u);
+          x === 14 ? ag.moveTo(x, y) : ag.lineTo(x, y);
+        }
+        ag.stroke();
+      }
+    }
+    ag.globalAlpha = 1;
+  }
+
+  const meter = $('meterFill');
   function frame(ms) {
     const now = ms / 1000;
-    if (current && analyser) analyseLive();
-    else if (!current && srcName.textContent === 'Preview animation') analysePreview(now);
+    if (src && analyser) analyseLive();
+    else if (!started) analysePreview(now);
     else { snap.level = 0; snap.bands.fill(0); snap.wave.fill(0); }
-    step(now);
-    draw();
-    meterFill.style.width = Math.min(100, snap.level * 400) + '%';
+    step(now); draw(); drawArt();
+    meter.style.width = Math.min(100, snap.level * 400) + '%';
+    refreshNowPlaying(false);
     requestAnimationFrame(frame);
   }
 

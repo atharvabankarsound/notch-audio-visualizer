@@ -1,87 +1,20 @@
 import AppKit
 import Combine
 
-enum WaveStyle: String, CaseIterable {
-    case glass, aurora, accent
-
-    var title: String {
-        switch self {
-        case .glass: return "Glass"
-        case .aurora: return "Aurora"
-        case .accent: return "System Accent"
-        }
-    }
-}
-
-enum Sensitivity: String, CaseIterable {
-    case low, normal, high
-
-    var title: String { rawValue.capitalized }
-
-    var gainDB: Float {
-        switch self {
-        case .low: return -6
-        case .normal: return 0
-        case .high: return 9
-        }
-    }
-}
-
-/// User-facing settings, persisted in UserDefaults.
-final class VisualizerSettings: ObservableObject {
-    @Published var style: WaveStyle {
-        didSet { UserDefaults.standard.set(style.rawValue, forKey: "style") }
-    }
-    @Published var sensitivity: Sensitivity {
-        didSet { UserDefaults.standard.set(sensitivity.rawValue, forKey: "sensitivity") }
-    }
-
-    init() {
-        let defaults = UserDefaults.standard
-        style = WaveStyle(rawValue: defaults.string(forKey: "style") ?? "") ?? .glass
-        sensitivity = Sensitivity(rawValue: defaults.string(forKey: "sensitivity") ?? "") ?? .normal
-    }
-
-    // The last chosen audio source, so NotchWave picks up where you left it.
-    var savedSource: AudioSource {
-        get {
-            let d = UserDefaults.standard
-            switch d.string(forKey: "source.kind") {
-            case "mic": return .microphone
-            case "app":
-                if let id = d.string(forKey: "source.bundleID") {
-                    return .application(bundleID: id, name: d.string(forKey: "source.name") ?? id)
-                }
-                return .systemAudio
-            default: return .systemAudio
-            }
-        }
-        set {
-            let d = UserDefaults.standard
-            switch newValue {
-            case .microphone:
-                d.set("mic", forKey: "source.kind")
-            case .systemAudio:
-                d.set("system", forKey: "source.kind")
-            case .application(let id, let name):
-                d.set("app", forKey: "source.kind")
-                d.set(id, forKey: "source.bundleID")
-                d.set(name, forKey: "source.name")
-            }
-        }
-    }
-}
-
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let analyzer = SpectrumAnalyzer(bandCount: 24)
     private let settings = VisualizerSettings()
     private lazy var audio = AudioController(analyzer: analyzer)
     private lazy var notch = NotchWindowController(analyzer: analyzer, settings: settings)
+    private lazy var settingsWindow = SettingsWindowController(settings: settings, analyzer: analyzer, delegate: self)
     private var statusItem: NSStatusItem?
+    private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        analyzer.sensitivityDB = settings.sensitivity.gainDB
+        settings.$sensitivityDB
+            .sink { [analyzer] value in analyzer.sensitivityDB = Float(value) }
+            .store(in: &cancellables)
         notch.show()
         setUpStatusItem()
 
@@ -166,17 +99,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(item)
         }
 
-        let sensItem = NSMenuItem(title: "Sensitivity", action: nil, keyEquivalent: "")
-        let sensMenu = NSMenu()
-        for level in Sensitivity.allCases {
-            let item = NSMenuItem(title: level.title, action: #selector(chooseSensitivity(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = level.rawValue
-            item.state = settings.sensitivity == level ? .on : .off
-            sensMenu.addItem(item)
-        }
-        sensItem.submenu = sensMenu
-        menu.addItem(sensItem)
+        menu.addItem(.separator())
+        let prefs = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        prefs.target = self
+        menu.addItem(prefs)
 
         menu.addItem(.separator())
         let pause = NSMenuItem(title: audio.source == nil ? "Resume Listening" : "Pause Listening",
@@ -212,8 +138,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func chooseSource(_ sender: NSMenuItem) {
         guard let box = sender.representedObject as? SourceBox else { return }
-        settings.savedSource = box.source
-        audio.start(box.source)
+        select(box.source)
     }
 
     @objc private func chooseStyle(_ sender: NSMenuItem) {
@@ -221,14 +146,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         settings.style = style
     }
 
-    @objc private func chooseSensitivity(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String, let level = Sensitivity(rawValue: raw) else { return }
-        settings.sensitivity = level
-        analyzer.sensitivityDB = level.gainDB
+    @objc private func openSettings() {
+        settingsWindow.show()
     }
 
     @objc private func togglePause() {
-        if audio.source == nil {
+        setListening(audio.source == nil)
+    }
+
+    // MARK: - Used by the Settings window
+
+    var currentSource: AudioSource? { audio.source }
+
+    func select(_ source: AudioSource) {
+        settings.savedSource = source
+        audio.start(source)
+    }
+
+    func setListening(_ on: Bool) {
+        if on {
             audio.start(settings.savedSource)
         } else {
             audio.stop()

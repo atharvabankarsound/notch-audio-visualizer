@@ -10,7 +10,8 @@ A live audio waveform that grows out of the MacBook notch. It listens to the mic
 - When sound plays, the shape widens on a spring and smooth frosted-glass line waveforms rise out of flat lines either side of the notch, with faint echo lines trailing behind and a thin waveform along the bottom edge. The line style follows the `line_strip` grooves of the vinyl patch.
 - Bass sits next to the notch and treble reaches out to the tips, mirrored left and right. This is the same frequency layout as my Max/MSP and Jitter [rotating-vinyl visualiser](https://github.com/atharvabankarsound/vinyl-audio-visualizer) (lows at the centre, highs at the rim), unrolled along the menu bar.
 - Settles back to a plain notch about 1.6 seconds after the sound stops.
-- Menu bar icon to choose the source (All Computer Audio, Microphone, or a Single App), the style (Glass, Aurora, System Accent) and the sensitivity.
+- Menu bar icon to choose the source (All Computer Audio, Microphone, or a Single App) and the style (Glass, Aurora, System Accent).
+- A Settings window (menu bar icon ▸ Settings…, or ⌘,) with the same controls as the demo website: line thickness, wave height, width, glass, glow, echo lines, waveform under the notch, smoothing, how long it stays open after silence, sensitivity, and a live level meter.
 - On a display without a notch, a virtual notch appears only while audio is playing.
 
 ## Requirements
@@ -55,7 +56,9 @@ The build script signs the app ad hoc, so macOS may ask for permissions again af
 | File | Role |
 | --- | --- |
 | `NotchWaveApp.swift` | Entry point; runs as a menu bar app with no Dock icon |
-| `AppDelegate.swift` | Menu bar menu, settings, error alerts |
+| `AppDelegate.swift` | Menu bar menu, error alerts |
+| `Settings.swift` | All user settings, saved in UserDefaults |
+| `SettingsWindow.swift` | The System Settings–style window with sliders and toggles |
 | `AudioCapture.swift` | Microphone and ScreenCaptureKit capture, source switching |
 | `SpectrumAnalyzer.swift` | FFT, band mapping, thread-safe snapshots for the renderer |
 | `NotchWindow.swift` | Reads the notch size from macOS and pins a click-through panel over it |
