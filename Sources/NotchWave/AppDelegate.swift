@@ -2,12 +2,12 @@ import AppKit
 import Combine
 
 enum WaveStyle: String, CaseIterable {
-    case aurora, mono, accent
+    case glass, aurora, accent
 
     var title: String {
         switch self {
+        case .glass: return "Glass"
         case .aurora: return "Aurora"
-        case .mono: return "Mono"
         case .accent: return "System Accent"
         }
     }
@@ -38,7 +38,7 @@ final class VisualizerSettings: ObservableObject {
 
     init() {
         let defaults = UserDefaults.standard
-        style = WaveStyle(rawValue: defaults.string(forKey: "style") ?? "") ?? .aurora
+        style = WaveStyle(rawValue: defaults.string(forKey: "style") ?? "") ?? .glass
         sensitivity = Sensitivity(rawValue: defaults.string(forKey: "sensitivity") ?? "") ?? .normal
     }
 

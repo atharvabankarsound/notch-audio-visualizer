@@ -7,10 +7,10 @@ A live audio waveform that grows out of the MacBook notch. It listens to the mic
 ## What it does
 
 - Extends the notch with a black shape that matches its outline, so at rest it is invisible.
-- When sound plays, the shape widens on a spring and shows 24 frequency bands either side of the notch, with a thin waveform along the bottom edge.
+- When sound plays, the shape widens on a spring and smooth frosted-glass line waveforms rise out of flat lines either side of the notch, with faint echo lines trailing behind and a thin waveform along the bottom edge. The line style follows the `line_strip` grooves of the vinyl patch.
 - Bass sits next to the notch and treble reaches out to the tips, mirrored left and right. This is the same frequency layout as my Max/MSP and Jitter [rotating-vinyl visualiser](https://github.com/atharvabankarsound/vinyl-audio-visualizer) (lows at the centre, highs at the rim), unrolled along the menu bar.
 - Settles back to a plain notch about 1.6 seconds after the sound stops.
-- Menu bar icon to choose the source (All Computer Audio, Microphone, or a Single App), the style (Aurora, Mono, System Accent) and the sensitivity.
+- Menu bar icon to choose the source (All Computer Audio, Microphone, or a Single App), the style (Glass, Aurora, System Accent) and the sensitivity.
 - On a display without a notch, a virtual notch appears only while audio is playing.
 
 ## Requirements
@@ -49,7 +49,7 @@ The build script signs the app ad hoc, so macOS may ask for permissions again af
  AVAudioEngine (mic)   ┐    SpectrumAnalyzer                 NotchVisualizerView
  ScreenCaptureKit      ├──▶ 2048-point FFT (Accelerate)  ──▶ SwiftUI Canvas, every display frame
   (all audio / one app)┘    ~94 updates a second             spring physics for the shape
-                            24 log bands, 40 Hz – 16 kHz     fast-attack, slow-release bars
+                            24 log bands, 40 Hz – 16 kHz     glass line waveforms + echoes
 ```
 
 | File | Role |

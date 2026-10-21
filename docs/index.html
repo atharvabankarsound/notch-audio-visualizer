@@ -238,8 +238,8 @@ footer { border-top: 1px solid var(--line); padding-top: 18px; color: var(--mute
     <div class="group">
       <span class="group-label" id="styleLabel">Style</span>
       <div class="seg" role="group" aria-labelledby="styleLabel" id="styleSeg">
-        <button data-style="aurora" aria-pressed="true">Aurora</button>
-        <button data-style="mono" aria-pressed="false">Mono</button>
+        <button data-style="glass" aria-pressed="true">Glass</button>
+        <button data-style="aurora" aria-pressed="false">Aurora</button>
         <button data-style="accent" aria-pressed="false">System Accent</button>
       </div>
       <span class="group-label" id="viewLabel">View</span>
@@ -259,7 +259,7 @@ footer { border-top: 1px solid var(--line); padding-top: 18px; color: var(--mute
     <section id="how">
       <h2>It sits around the notch, not in it</h2>
       <div class="body">
-        <p>The notch is part of the hardware, so no app can draw inside it. NotchWave draws a black shape that continues the notch’s own outline: flat against the top of the screen, with the same rounded lower corners. At rest it lines up exactly with the real notch and disappears. When sound starts it widens on a spring, and when the sound stops it settles back after a short pause so it doesn’t flicker between songs.</p>
+        <p>The notch is part of the hardware, so no app can draw inside it. NotchWave draws a black shape that continues the notch’s own outline: flat against the top of the screen, with the same rounded lower corners. At rest it lines up exactly with the real notch and disappears. When sound starts it widens on a spring and smooth glass waveforms rise from flat lines, and when the sound stops it settles back after a short pause so it doesn’t flicker between songs.</p>
         <p>The size comes from macOS itself (the screen’s safe-area inset and the two usable menu bar areas either side), so it fits every notched MacBook. On a display without a notch it grows a virtual one out of nothing while audio plays.</p>
       </div>
     </section>
@@ -284,9 +284,8 @@ footer { border-top: 1px solid var(--line); padding-top: 18px; color: var(--mute
             <svg viewBox="0 0 240 150" role="img" aria-label="Notch: low frequencies beside the notch, high frequencies at the outer tips">
               <rect x="0" y="0" width="240" height="22" fill="#1c2138"/>
               <path d="M24 0 Q28 0 28 4 V24 Q28 32 36 32 H204 Q212 32 212 24 V4 Q212 0 216 0 Z" fill="#000"/>
-              <g fill="#62d3e4"><rect x="81" y="8" width="2.4" height="9" rx="1.2"/><rect x="155" y="8" width="2.4" height="9" rx="1.2"/></g>
-              <g fill="#a49bff"><rect x="66" y="10" width="2.4" height="6" rx="1.2"/><rect x="170" y="10" width="2.4" height="6" rx="1.2"/></g>
-              <g fill="#f08fd3"><rect x="48" y="11" width="2.4" height="3.5" rx="1.2"/><rect x="188" y="11" width="2.4" height="3.5" rx="1.2"/></g>
+              <path d="M86 12 Q80 4 72 9 T56 11 T40 12 M86 12 Q80 20 72 15 T56 13 T40 12" fill="none" stroke="#dfe7ff" stroke-width="1.1" stroke-linecap="round"/>
+              <path d="M154 12 Q160 4 168 9 T184 11 T200 12 M154 12 Q160 20 168 15 T184 13 T200 12" fill="none" stroke="#dfe7ff" stroke-width="1.1" stroke-linecap="round"/>
               <rect x="88" y="0" width="64" height="20" rx="6" fill="#000"/>
               <text x="120" y="62" fill="#9aa1ad" font-size="10" text-anchor="middle" font-family="IBM Plex Mono, monospace">HIGH ← LOW · NOTCH · LOW → HIGH</text>
               <text x="120" y="146" fill="#9aa1ad" font-size="10" text-anchor="middle" font-family="IBM Plex Mono, monospace">24 BANDS · 40 Hz – 16 kHz</text>
@@ -303,7 +302,7 @@ footer { border-top: 1px solid var(--line); padding-top: 18px; color: var(--mute
         <ol class="pipeline">
           <li><span class="step">1 · Capture</span><h3>Hear the Mac</h3><p><code>AVAudioEngine</code> for the microphone. <code>ScreenCaptureKit</code> for everything the Mac plays, or one app on its own.</p></li>
           <li><span class="step">2 · Analyse</span><h3>Split the sound</h3><p>A 2048-point FFT with Apple’s Accelerate framework, about 94 times a second, folded into 24 log-spaced bands.</p></li>
-          <li><span class="step">3 · Draw</span><h3>Move like macOS</h3><p>A SwiftUI <code>Canvas</code> redrawn every display frame, with spring physics for the shape and fast-attack, slow-release bars.</p></li>
+          <li><span class="step">3 · Draw</span><h3>Move like macOS</h3><p>A SwiftUI <code>Canvas</code> redrawn every display frame, with spring physics for the shape and smooth line waveforms with a frosted-glass fill.</p></li>
         </ol>
         <p>Nothing is recorded or uploaded. Audio is analysed in memory and thrown away a few milliseconds later.</p>
       </div>
@@ -353,7 +352,7 @@ open build/NotchWave.app</pre>
   const srcName = document.getElementById('srcName');
   const msg = document.getElementById('msg');
 
-  const settings = { style: 'aurora', sensIndex: 1, zoom: 1 };
+  const settings = { style: 'glass', sensIndex: 1, zoom: 1 };
   const SENS = [{ name: 'Low', db: -6 }, { name: 'Normal', db: 0 }, { name: 'High', db: 9 }];
 
   let scale = 1;            // CSS px per macOS point
@@ -645,7 +644,12 @@ open build/NotchWave.app</pre>
   }
 
   // ---------- Renderer: a port of NotchVisualizerView.swift ----------
-  const R = { bands: new Float32Array(BANDS), wave: new Float32Array(WAVE), e: 0, v: 0, last: null, loud: -Infinity };
+  // Waveforms are drawn as smooth line strips (like the jit.gl.mesh line_strip grooves in the
+  // vinyl patch), with two slower "echo" lines behind them and a frosted-glass fill.
+  const R = {
+    bands: new Float32Array(BANDS), echo1: new Float32Array(BANDS), echo2: new Float32Array(BANDS),
+    wave: new Float32Array(WAVE), e: 0, v: 0, last: null, loud: -Infinity
+  };
 
   function step(now) {
     const dt = Math.min(Math.max(now - (R.last ?? now), 0), 1 / 30);
@@ -654,25 +658,31 @@ open build/NotchWave.app</pre>
     const target = (now - R.loud) < 1.6 ? 1 : 0;
     const a = 170 * (target - R.e) - 19 * R.v;
     R.v += a * dt; R.e += R.v * dt;
+    const k1 = 1 - Math.exp(-5 * dt), k2 = 1 - Math.exp(-2.5 * dt);
     for (let i = 0; i < BANDS; i++) {
-      const goal = snap.bands[i], rate = goal > R.bands[i] ? 30 : 7;
+      const goal = snap.bands[i], rate = goal > R.bands[i] ? 24 : 6;
       R.bands[i] += (goal - R.bands[i]) * (1 - Math.exp(-rate * dt));
+      R.echo1[i] += (R.bands[i] - R.echo1[i]) * k1;
+      R.echo2[i] += (R.echo1[i] - R.echo2[i]) * k2;
     }
-    for (let i = 0; i < WAVE; i++) R.wave[i] += (snap.wave[i] - R.wave[i]) * (1 - Math.exp(-40 * dt));
+    for (let i = 0; i < WAVE; i++) R.wave[i] += (snap.wave[i] - R.wave[i]) * (1 - Math.exp(-30 * dt));
   }
 
-  function hsl(h, l, a) { return `hsla(${h}, 100%, ${l}%, ${a})`; }
-  function barColour(i, value, alpha) {
-    const t = i / (BANDS - 1);
-    if (settings.style === 'mono') return `rgba(255,255,255,${(0.35 + 0.6 * value) * alpha})`;
-    const glow = (0.55 + 0.45 * value) * alpha;
-    if (settings.style === 'accent') return `rgba(10,132,255,${glow})`;
-    return hsl(187 + 137 * t, 69, glow);
+  // Tint stops from the notch edge (bass) out to the tip (treble), per style.
+  function tintStops(alpha) {
+    if (settings.style === 'aurora') return [[0, 120, 232, 240], [0.5, 182, 168, 255], [1, 255, 156, 214]].map(s => [s[0], `rgba(${s[1]},${s[2]},${s[3]},${alpha})`]);
+    if (settings.style === 'accent') return [[0, `rgba(10,132,255,${alpha})`], [1, `rgba(110,185,255,${alpha})`]];
+    return [[0, `rgba(240,244,255,${alpha})`], [1, `rgba(214,224,245,${alpha})`]];
+  }
+  function tint(xNear, xFar, alpha) {
+    const grad = g.createLinearGradient(xNear, 0, xFar, 0);
+    for (const [o, c] of tintStops(alpha)) grad.addColorStop(o, c);
+    return grad;
   }
 
   function radius(e) { return 9 + 3 * Math.min(1, e); }
 
-  function island(x0, x1, bottom, e) {
+  function islandPath(x0, x1, bottom, e) {
     const r = radius(e), k = 0.45;
     g.beginPath();
     g.moveTo(x0 - EAR, 0);
@@ -684,15 +694,70 @@ open build/NotchWave.app</pre>
     g.lineTo(x1, EAR);
     g.bezierCurveTo(x1, EAR * (1 - k), x1 + EAR * k, 0, x1 + EAR, 0);
     g.closePath();
-    g.fillStyle = '#000';
-    g.fill();
   }
 
-  function pill(x, y, w, h) {
-    const r = w / 2;
-    g.beginPath();
-    if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h);
-    g.fill();
+  // Smooth curve through points (midpoint quadratic smoothing).
+  function smooth(pts, move) {
+    if (move) g.moveTo(pts[0][0], pts[0][1]); else g.lineTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length - 1; i++) {
+      g.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+    }
+    const l = pts[pts.length - 1]; g.lineTo(l[0], l[1]);
+  }
+
+  const ease = t => t * t * (3 - 2 * t);
+
+  // One wing's waveform envelope: half-heights along the wing, bass at the notch edge.
+  function envelope(vals, start, end, side, edgeX, midY, maxHalf) {
+    const N = 56, top = [], bot = [];
+    for (let j = 0; j <= N; j++) {
+      const u = j / N, d = start + u * (end - start);
+      const f = u * (BANDS - 1), i = Math.floor(f), fr = f - i;
+      const v = vals[i] * (1 - fr) + vals[Math.min(i + 1, BANDS - 1)] * fr;
+      const taper = ease(Math.min(1, u / 0.1)) * ease(Math.min(1, (1 - u) / 0.22));
+      const h = (0.6 + v * maxHalf) * taper;
+      const x = edgeX + side * d;
+      top.push([x, midY - h]); bot.push([x, midY + h]);
+    }
+    return { top, bot };
+  }
+
+  function drawWing(side, cx, nw, wing, midY, maxHalf, fade) {
+    const edgeX = cx + side * nw / 2;
+    const start = 8, end = wing - 10;
+    if (end - start < 8) return;
+    const xNear = edgeX + side * start, xFar = edgeX + side * end;
+    const reveal = Math.min(1, (end - start) / 40) * fade;
+
+    // Echo lines: thin and faint, like older grooves behind the current one.
+    for (const [vals, alpha] of [[R.echo2, 0.16], [R.echo1, 0.3]]) {
+      const env = envelope(vals, start, end, side, edgeX, midY, maxHalf);
+      g.beginPath(); smooth(env.top, true);
+      g.moveTo(env.bot[0][0], env.bot[0][1]); smooth(env.bot, true);
+      g.strokeStyle = tint(xNear, xFar, alpha * reveal); g.lineWidth = 0.7; g.stroke();
+    }
+
+    const env = envelope(R.bands, start, end, side, edgeX, midY, maxHalf);
+
+    // Frosted glass body: tinted wash + white sheen that is brighter at the top edge.
+    g.beginPath(); smooth(env.top, true); smooth(env.bot.slice().reverse(), false); g.closePath();
+    g.fillStyle = tint(xNear, xFar, 0.16 * reveal); g.fill();
+    const sheen = g.createLinearGradient(0, midY - maxHalf, 0, midY + maxHalf);
+    sheen.addColorStop(0, `rgba(255,255,255,${0.32 * reveal})`);
+    sheen.addColorStop(0.45, `rgba(255,255,255,${0.05 * reveal})`);
+    sheen.addColorStop(1, `rgba(255,255,255,${0.14 * reveal})`);
+    g.fillStyle = sheen; g.fill();
+
+    // Edges: soft glow, then a crisp hairline on top.
+    g.save();
+    g.shadowColor = settings.style === 'aurora' ? `rgba(160,190,255,${0.55 * reveal})` : settings.style === 'accent' ? `rgba(10,132,255,${0.6 * reveal})` : `rgba(255,255,255,${0.5 * reveal})`;
+    g.shadowBlur = 6 * scale * dpr;
+    g.beginPath(); smooth(env.top, true); g.moveTo(env.bot[0][0], env.bot[0][1]); smooth(env.bot, true);
+    g.strokeStyle = tint(xNear, xFar, 0.95 * reveal); g.lineWidth = 1.1; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.stroke();
+    g.restore();
+    g.beginPath(); smooth(env.top, true);
+    g.strokeStyle = `rgba(255,255,255,${0.7 * reveal})`; g.lineWidth = 0.45; g.stroke();
   }
 
   function draw() {
@@ -705,49 +770,44 @@ open build/NotchWave.app</pre>
     const wing = MAX_WING * e, drop = MAX_DROP * e;
     const x0 = cx - nw / 2 - wing, x1 = cx + nw / 2 + wing, bottom = nh + drop;
 
-    island(x0, x1, bottom, e);
+    islandPath(x0, x1, bottom, e);
+    g.fillStyle = '#000'; g.fill();
     if (fade < 0.01) return;
 
-    const barW = 2.4, pitch = 4.2, inset = 9, maxH = Math.max(nh - 14, 8), midY = nh / 2;
-    for (let i = 0; i < BANDS; i++) {
-      const d = inset + i * pitch;
-      const reveal = (wing - 8 - d - barW) / 14;
-      if (reveal <= 0) break;
-      const alpha = Math.min(1, reveal) * fade;
-      const value = R.bands[i];
-      const h = Math.max(barW, value * maxH);
-      g.fillStyle = barColour(i, value, alpha);
-      pill(cx - nw / 2 - d - barW, midY - h / 2, barW, h);
-      pill(cx + nw / 2 + d, midY - h / 2, barW, h);
-    }
+    // Glass rim: a faint highlight along the lower edge, brightest at the centre.
+    const r = radius(e);
+    const rim = g.createLinearGradient(x0, 0, x1, 0);
+    rim.addColorStop(0, 'rgba(255,255,255,0)');
+    rim.addColorStop(0.5, `rgba(255,255,255,${0.22 * fade})`);
+    rim.addColorStop(1, 'rgba(255,255,255,0)');
+    g.beginPath(); g.moveTo(x0 + r, bottom - 0.4); g.lineTo(x1 - r, bottom - 0.4);
+    g.strokeStyle = rim; g.lineWidth = 0.6; g.stroke();
 
+    const midY = nh / 2, maxHalf = Math.max(nh / 2 - 6, 5);
+    drawWing(-1, cx, nw, wing, midY, maxHalf, fade);
+    drawWing(1, cx, nw, wing, midY, maxHalf, fade);
+
+    // Time-domain lip under the notch, mirrored from the centre outwards.
     if (drop <= 2) return;
-    const r = radius(e), left = x0 + r + 4, right = x1 - r - 4, halfSpan = (right - left) / 2;
+    const left = x0 + r + 4, right = x1 - r - 4, halfSpan = (right - left) / 2;
     if (halfSpan <= 4) return;
-    const baseline = nh + drop * 0.5, amp = drop * 0.42;
-    g.beginPath();
-    for (let x = left, first = true; x <= right; x += 1.5) {
+    const baseline = nh + drop * 0.45, amp = drop * 0.38;
+    const pts = [];
+    for (let x = left; x <= right; x += 2) {
       const u = Math.abs(x - cx) / halfSpan;
       const idx = Math.min(WAVE - 1, Math.floor(u * (WAVE - 1)));
       const taper = Math.sin(Math.PI * (1 - Math.min(u, 1)) / 2);
       const s = Math.max(-1, Math.min(1, R.wave[idx] * 2.5));
-      const y = baseline + s * amp * taper;
-      if (first) { g.moveTo(x, y); first = false; } else g.lineTo(x, y);
+      pts.push([x, baseline + s * amp * taper]);
     }
-    const grad = g.createLinearGradient(left, 0, right, 0);
-    const a = 0.85 * fade;
-    if (settings.style === 'aurora') {
-      grad.addColorStop(0, hsl(324, 69, 0)); grad.addColorStop(0.25, hsl(324, 69, a));
-      grad.addColorStop(0.5, hsl(187, 69, a));
-      grad.addColorStop(0.75, hsl(324, 69, a)); grad.addColorStop(1, hsl(324, 69, 0));
-    } else {
-      const c = settings.style === 'mono' ? '255,255,255' : '10,132,255';
-      const aa = settings.style === 'mono' ? a * 0.8 : a;
-      grad.addColorStop(0, `rgba(${c},0)`); grad.addColorStop(0.3, `rgba(${c},${aa})`);
-      grad.addColorStop(0.7, `rgba(${c},${aa})`); grad.addColorStop(1, `rgba(${c},0)`);
-    }
-    g.strokeStyle = grad; g.lineWidth = 1.2; g.lineJoin = 'round';
-    g.stroke();
+    if (pts.length < 3) return;
+    const lip = g.createLinearGradient(left, 0, right, 0);
+    const stops = tintStops(0.75 * fade);
+    lip.addColorStop(0, stops[stops.length - 1][1].replace(/[\d.]+\)$/, '0)'));
+    lip.addColorStop(0.5, stops[0][1]);
+    lip.addColorStop(1, stops[stops.length - 1][1].replace(/[\d.]+\)$/, '0)'));
+    g.beginPath(); smooth(pts, true);
+    g.strokeStyle = lip; g.lineWidth = 0.9; g.lineJoin = 'round'; g.stroke();
   }
 
   function frame(ms) {
