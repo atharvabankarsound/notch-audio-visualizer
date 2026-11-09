@@ -7,11 +7,11 @@ A live audio waveform that grows out of the MacBook notch. It listens to the mic
 ## What it does
 
 - Extends the notch with a black shape that matches its outline, so at rest it is invisible.
-- When sound plays, the shape widens on a spring and smooth frosted-glass line waveforms rise out of flat lines either side of the notch, with faint echo lines trailing behind and a thin waveform along the bottom edge. The line style follows the `line_strip` grooves of the vinyl patch.
-- Five waveform shapes, picked from thumbnails in Settings:
-  - **Wrap** (default): one waveform that hugs the notch on its left, bottom and right sides and pushes outward with the sound, so the notch itself seems to breathe.
-  - **Wave**: frosted-glass line waveforms either side of the notch.
-  - **Bars**: glass capsules ("candles").
+- When sound plays, the notch opens on a spring and the visualiser fades in; when it stops, everything settles back.
+- Five waveform styles, picked from thumbnails in Settings:
+  - **Island** (default): like the Dynamic Island's Now Playing state. The notch extends slightly, with a small orb on the left that breathes with the bass and five slim bars on the right.
+  - **Halo**: the notch doesn't grow at all. A fine line of light traces its edge and brightens with the music: bass at the bottom, treble rising up the sides.
+  - **Bars**: glass capsules ("candles") either side of the notch.
   - **Thread**: one fine line per side.
   - **Dots**: a small dot matrix.
 - Bass sits next to the notch and treble reaches out to the tips, mirrored left and right. This is the same frequency layout as my Max/MSP and Jitter [rotating-vinyl visualiser](https://github.com/atharvabankarsound/vinyl-audio-visualizer) (lows at the centre, highs at the rim), unrolled along the menu bar.
@@ -56,7 +56,7 @@ The build script signs the app ad hoc, so macOS may ask for permissions again af
  AVAudioEngine (mic)   ┐    SpectrumAnalyzer                 NotchVisualizerView
  ScreenCaptureKit      ├──▶ 2048-point FFT (Accelerate)  ──▶ SwiftUI Canvas, every display frame
   (all audio / one app)┘    ~94 updates a second             spring physics for the shape
-                            24 log bands, 40 Hz – 16 kHz     glass line waveforms + echoes
+                            24 log bands, 40 Hz – 16 kHz     Island, Halo, Bars, Thread, Dots
 ```
 
 | File | Role |
@@ -68,7 +68,7 @@ The build script signs the app ad hoc, so macOS may ask for permissions again af
 | `AudioCapture.swift` | Microphone and ScreenCaptureKit capture, source switching |
 | `SpectrumAnalyzer.swift` | FFT, band mapping, thread-safe snapshots for the renderer |
 | `NotchWindow.swift` | Reads the notch size from macOS and pins a click-through panel over it |
-| `NotchVisualizerView.swift` | The island shape, bars, waveform lip and animation |
+| `NotchVisualizerView.swift` | The notch shape, the five styles and the animation |
 | `docs/index.html` | The browser demo (served by GitHub Pages) |
 
 The notch size comes from `NSScreen.safeAreaInsets` and the `auxiliaryTopLeftArea` / `auxiliaryTopRightArea` rectangles, so it fits every notched model without hard-coded sizes.

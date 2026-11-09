@@ -99,14 +99,22 @@ struct NotchVisualizerView: View {
         if !geometry.hasNotch && fade < 0.01 { return }
         let cx = size.width / 2
 
-        // Wrap: one waveform around the notch's three sides. The notch barely grows sideways;
-        // the waveform itself is the growth.
-        if settings.shape == .wrap {
-            let x0 = cx - notchWidth / 2 - 3 * e
-            let x1 = cx + notchWidth / 2 + 3 * e
-            let bottom = notchHeight + 2 * e
-            context.fill(islandPath(x0: x0, x1: x1, bottom: bottom, e: e), with: .color(.black))
-            if fade >= 0.01 { drawWrap(in: &context, x0: x0, x1: x1, bottom: bottom, e: e, fade: fade) }
+        // Island: the notch extends slightly, like the Dynamic Island's Now Playing state.
+        if settings.shape == .island {
+            let wing = NotchLayout.islandWing * e
+            let x0 = cx - notchWidth / 2 - wing
+            let x1 = cx + notchWidth / 2 + wing
+            context.fill(islandPath(x0: x0, x1: x1, bottom: notchHeight, e: e), with: .color(.black))
+            if fade >= 0.01 { drawIsland(in: &context, x0: x0, x1: x1, notchHeight: notchHeight, fade: fade) }
+            return
+        }
+
+        // Halo: the notch stays exactly as it is; a line of light traces its edge.
+        if settings.shape == .halo {
+            let x0 = cx - notchWidth / 2
+            let x1 = cx + notchWidth / 2
+            context.fill(islandPath(x0: x0, x1: x1, bottom: notchHeight, e: 1), with: .color(.black))
+            if fade >= 0.01 { drawHalo(in: &context, x0: x0, x1: x1, notchHeight: notchHeight, fade: fade) }
             return
         }
 
@@ -137,11 +145,10 @@ struct NotchVisualizerView: View {
         for side in [-1.0, 1.0] as [CGFloat] {
             let edgeX = cx + side * notchWidth / 2
             switch settings.shape {
-            case .wave:   drawWave(in: &context, side: side, edgeX: edgeX, wing: wing, midY: midY, maxHalf: maxHalf, fade: fade)
             case .bars:   drawBars(in: &context, side: side, edgeX: edgeX, wing: wing, midY: midY, maxHalf: maxHalf, fade: fade)
             case .thread: drawThread(in: &context, side: side, edgeX: edgeX, wing: wing, midY: midY, maxHalf: maxHalf, fade: fade)
             case .dots:   drawDots(in: &context, side: side, edgeX: edgeX, wing: wing, midY: midY, maxHalf: maxHalf, fade: fade)
-            case .wrap:   break
+            case .island, .halo: break
             }
         }
 
@@ -173,79 +180,6 @@ struct NotchVisualizerView: View {
                                              startPoint: CGPoint(x: left, y: baseline),
                                              endPoint: CGPoint(x: right, y: baseline)),
                        style: StrokeStyle(lineWidth: 0.9 * settings.thickness, lineCap: .round, lineJoin: .round))
-    }
-
-    // MARK: - Wave: frosted-glass envelope
-
-    private func drawWave(in context: inout GraphicsContext, side: CGFloat, edgeX: CGFloat,
-                          wing: CGFloat, midY: CGFloat, maxHalf: CGFloat, fade: CGFloat) {
-        let start: CGFloat = 8
-        let end = wing - 10
-        guard end - start >= 8 else { return }
-        let near = CGPoint(x: edgeX + side * start, y: midY)
-        let far = CGPoint(x: edgeX + side * end, y: midY)
-        let reveal = Double(min(1, (end - start) / 40) * fade)
-        let th = CGFloat(settings.thickness)
-        let glassAmount = settings.glass / 100
-
-        func tint(_ alpha: Double) -> GraphicsContext.Shading {
-            .linearGradient(gradient(alpha: alpha), startPoint: near, endPoint: far)
-        }
-
-        // Echo lines: thin and faint, like older grooves behind the current one.
-        for (values, alpha) in settings.echoLines ? [(state.echo2, 0.16), (state.echo1, 0.3)] : [] {
-            let env = envelope(values, start: start, end: end, side: side, edgeX: edgeX, midY: midY, maxHalf: maxHalf)
-            var lines = Path()
-            addSmooth(env.top, to: &lines, move: true)
-            addSmooth(env.bottom, to: &lines, move: true)
-            context.stroke(lines, with: tint(alpha * reveal), lineWidth: 0.7 * th)
-        }
-
-        let env = envelope(state.bands, start: start, end: end, side: side, edgeX: edgeX, midY: midY, maxHalf: maxHalf)
-
-        // Frosted-glass body: tinted wash, then a white sheen that's brighter at the top.
-        if glassAmount > 0 {
-            var body = Path()
-            addSmooth(env.top, to: &body, move: true)
-            addSmooth(env.bottom.reversed(), to: &body, move: false)
-            body.closeSubpath()
-            let g = glassAmount * reveal
-            context.fill(body, with: tint(0.22 * g))
-            context.fill(body, with: .linearGradient(
-                Gradient(stops: [.init(color: .white.opacity(0.45 * g), location: 0),
-                                 .init(color: .white.opacity(0.07 * g), location: 0.45),
-                                 .init(color: .white.opacity(0.2 * g), location: 1)]),
-                startPoint: CGPoint(x: 0, y: midY - maxHalf), endPoint: CGPoint(x: 0, y: midY + maxHalf)))
-        }
-
-        var edges = Path()
-        addSmooth(env.top, to: &edges, move: true)
-        addSmooth(env.bottom, to: &edges, move: true)
-        strokeWithGlow(edges, in: &context, shading: tint(0.95 * reveal), width: 1.1 * th, reveal: reveal)
-
-        var highlight = Path()
-        addSmooth(env.top, to: &highlight, move: true)
-        context.stroke(highlight, with: .color(.white.opacity(0.7 * reveal)), lineWidth: 0.4 * th)
-    }
-
-    /// Upper and lower edges of one wing's waveform. Tapers to a point at both ends,
-    /// so silence is a flat line — like the vinyl grooves.
-    private func envelope(_ values: [CGFloat], start: CGFloat, end: CGFloat, side: CGFloat,
-                          edgeX: CGFloat, midY: CGFloat, maxHalf: CGFloat) -> (top: [CGPoint], bottom: [CGPoint]) {
-        let samples = 56
-        var top: [CGPoint] = [], bottom: [CGPoint] = []
-        top.reserveCapacity(samples + 1)
-        bottom.reserveCapacity(samples + 1)
-        for j in 0...samples {
-            let u = CGFloat(j) / CGFloat(samples)
-            let d = start + u * (end - start)
-            let taper = ease(min(1, u / 0.1)) * ease(min(1, (1 - u) / 0.22))
-            let h = (0.6 + sample(values, u) * maxHalf) * taper
-            let x = edgeX + side * d
-            top.append(CGPoint(x: x, y: midY - h))
-            bottom.append(CGPoint(x: x, y: midY + h))
-        }
-        return (top, bottom)
     }
 
     // MARK: - Bars: glass capsules ("candles")
@@ -341,7 +275,7 @@ struct NotchVisualizerView: View {
         }
     }
 
-    // MARK: - Wrap: one waveform around three sides of the notch
+    // MARK: - Notch outline (used by Halo)
 
     private struct OutlinePoint { var point: CGPoint; var normal: CGVector; var f: CGFloat }
 
@@ -381,57 +315,123 @@ struct NotchVisualizerView: View {
         return points
     }
 
-    private func wrapLine(_ outline: [OutlinePoint], values: [CGFloat], amplitude: CGFloat, fade: CGFloat) -> [CGPoint] {
-        outline.map { p in
-            let u = abs(p.f - 0.5) * 2                  // 0 at the bottom centre (bass) → 1 at the top ends (treble)
-            let taper = ease(min(1, (1 - u) / 0.14))
-            let d = (1 + sample(values, u) * amplitude) * taper * fade
-            return CGPoint(x: p.point.x + p.normal.dx * d, y: p.point.y + p.normal.dy * d)
+    private var loudness: CGFloat {
+        state.bands.isEmpty ? 0 : state.bands.reduce(0, +) / CGFloat(state.bands.count)
+    }
+
+    /// Five values, low to high, for the Island bars.
+    private var fiveBands: [CGFloat] {
+        let edges = [0, 4, 9, 14, 19, 24]
+        return (0..<5).map { k in
+            let lo = min(edges[k], state.bands.count), hi = min(edges[k + 1], state.bands.count)
+            return lo < hi ? state.bands[lo..<hi].max() ?? 0 : 0
         }
     }
 
-    private func drawWrap(in context: inout GraphicsContext, x0: CGFloat, x1: CGFloat, bottom: CGFloat, e: CGFloat, fade: CGFloat) {
-        let outline = notchOutline(x0: x0, x1: x1, bottom: bottom, r: cornerRadius(e: e), samples: 180)
-        let amplitude = 13 * CGFloat(settings.height / 100)
+    // MARK: - Island: like the Dynamic Island's Now Playing state
+
+    /// A small orb on the left that breathes with the bass, five slim bars on the right.
+    private func drawIsland(in context: inout GraphicsContext, x0: CGFloat, x1: CGFloat, notchHeight: CGFloat, fade: CGFloat) {
+        let midY = notchHeight / 2
         let th = CGFloat(settings.thickness)
-        let glassAmount = settings.glass / 100
         let reveal = Double(fade)
-        let start = CGPoint(x: x0 - amplitude - 4, y: bottom)
-        let end = CGPoint(x: x1 + amplitude + 4, y: bottom)
-        func tint(_ alpha: Double) -> GraphicsContext.Shading {
-            .linearGradient(mirroredGradient(alpha: alpha), startPoint: start, endPoint: end)
+        let values = fiveBands
+        let bass = values[0]
+
+        // Orb
+        let ox = x0 + 15
+        let rOrb = (5 + bass * 1.1) * min(1, CGFloat(settings.height / 100) + 0.2)
+        let orbRect = CGRect(x: ox - rOrb, y: midY - rOrb, width: rOrb * 2, height: rOrb * 2)
+        let orb = Path(ellipseIn: orbRect)
+        let glow = settings.glow / 100
+        if glow > 0 {
+            var halo = context
+            halo.addFilter(.blur(radius: (3 + 4 * bass) * CGFloat(glow)))
+            halo.fill(orb, with: .color(glowColour.opacity((0.35 + 0.5 * Double(bass)) * glow * reveal)))
         }
+        context.fill(orb, with: .radialGradient(
+            Gradient(stops: [.init(color: colourAt(0, alpha: reveal), location: 0),
+                             .init(color: colourAt(0.5, alpha: 0.9 * reveal), location: 0.6),
+                             .init(color: colourAt(1, alpha: 0.75 * reveal), location: 1)]),
+            center: CGPoint(x: ox - rOrb * 0.35, y: midY - rOrb * 0.4), startRadius: rOrb * 0.1, endRadius: rOrb * 1.3))
+        let gloss = Path(ellipseIn: CGRect(x: ox - rOrb * 0.62, y: midY - rOrb * 0.84, width: rOrb * 1.24, height: rOrb * 0.84))
+        context.fill(gloss, with: .linearGradient(
+            Gradient(colors: [.white.opacity(0.45 * settings.glass / 100 * reveal), .white.opacity(0)]),
+            startPoint: CGPoint(x: ox, y: midY - rOrb), endPoint: CGPoint(x: ox, y: midY)))
 
-        let line = wrapLine(outline, values: state.bands, amplitude: amplitude, fade: fade)
-        var shape = Path()
-        addSmooth(line, to: &shape, move: true)
-        shape.closeSubpath()
-
-        // The notch grows with the sound: the whole shape is black…
-        context.fill(shape, with: .color(.black))
-        // …with a frosted-glass ribbon between the notch and the waveform.
-        if glassAmount > 0 {
-            var ribbon = context
-            ribbon.clip(to: shape)
-            ribbon.fill(shape, with: tint(0.18 * glassAmount * reveal))
-            ribbon.fill(shape, with: .linearGradient(
-                Gradient(colors: [.white.opacity(0), .white.opacity(0.22 * glassAmount * reveal)]),
-                startPoint: CGPoint(x: 0, y: bottom - 4), endPoint: CGPoint(x: 0, y: bottom + amplitude)))
-            context.fill(islandPath(x0: x0, x1: x1, bottom: bottom, e: e), with: .color(.black))
+        // Bars
+        let barWidth = 2.1 * th
+        let gap: CGFloat = 2.3
+        let total = 5 * barWidth + 4 * gap
+        let bx = x1 - 15 - total / 2
+        let maxH = min(notchHeight - 12, 15 * CGFloat(settings.height / 100))
+        for k in 0..<5 {
+            let h = max(barWidth, 2.5 + values[k] * maxH)
+            let rect = CGRect(x: bx + CGFloat(k) * (barWidth + gap), y: midY - h / 2, width: barWidth, height: h)
+            fillWithGlow(Path(roundedRect: rect, cornerRadius: barWidth / 2), in: &context,
+                         colour: colourAt(CGFloat(k) / 4, alpha: 0.95 * reveal), reveal: reveal)
         }
+    }
 
-        if settings.echoLines {
-            for (values, alpha) in [(state.echo2, 0.16), (state.echo1, 0.32)] {
-                var echo = Path()
-                addSmooth(wrapLine(outline, values: values, amplitude: amplitude, fade: fade), to: &echo, move: true)
-                context.stroke(echo, with: tint(alpha * reveal), lineWidth: 0.7 * th)
+    // MARK: - Halo: a fine line of light traces the notch
+
+    /// Three continuous strokes (left side, bottom, right side), each with a gradient sampled from the
+    /// spectrum: bass at the bottom centre, treble rising up the sides. The notch itself doesn't grow.
+    private func drawHalo(in context: inout GraphicsContext, x0: CGFloat, x1: CGFloat, notchHeight: CGFloat, fade: CGFloat) {
+        let offset: CGFloat = 1.3
+        let th = CGFloat(settings.thickness)
+        let outline = notchOutline(x0: x0 - offset, x1: x1 + offset, bottom: notchHeight + offset,
+                                   r: cornerRadius(e: 1) + offset, samples: 200)
+        let level = min(1, loudness * 1.6)
+        let glassAmount = settings.glass / 100
+        let flatY = notchHeight + offset - 0.01
+        func topFade(_ y: CGFloat) -> CGFloat { ease(min(1, y / (notchHeight * 0.7))) }   // melts into the screen edge
+
+        var left = outline.filter { $0.f < 0.5 && $0.point.y < flatY }
+        var right = outline.filter { $0.f > 0.5 && $0.point.y < flatY }
+        var bottom = outline.filter { $0.point.y >= flatY }
+        if let l = left.last { bottom.insert(l, at: 0) }
+        if let r = right.first { bottom.append(r) }
+        left.sort { $0.point.y < $1.point.y }
+        right.sort { $0.point.y < $1.point.y }
+
+        enum Axis { case vertical, horizontal }
+        func stroke(_ part: [OutlinePoint], _ axis: Axis, width: CGFloat, glow: Bool = false, alpha: (CGFloat) -> CGFloat) {
+            guard part.count > 1 else { return }
+            let coord: (OutlinePoint) -> CGFloat = { axis == .vertical ? $0.point.y : $0.point.x }
+            let lo = part.map(coord).min()!, hi = part.map(coord).max()!
+            let span = max(hi - lo, 0.001)
+            var stops: [Gradient.Stop] = []
+            for p in stride(from: 0, to: part.count, by: 4).map({ part[$0] }) + [part[part.count - 1]] {
+                let u = abs(p.f - 0.5) * 2
+                let a = max(0, min(1, alpha(sample(state.bands, u)) * topFade(p.point.y)))
+                stops.append(.init(color: colourAt(u, alpha: Double(a)), location: (coord(p) - lo) / span))
             }
+            stops.sort { $0.location < $1.location }
+            var path = Path()
+            path.move(to: part[0].point)
+            for p in part.dropFirst() { path.addLine(to: p.point) }
+            let shading = GraphicsContext.Shading.linearGradient(
+                Gradient(stops: stops),
+                startPoint: axis == .vertical ? CGPoint(x: 0, y: lo) : CGPoint(x: lo, y: 0),
+                endPoint: axis == .vertical ? CGPoint(x: 0, y: hi) : CGPoint(x: hi, y: 0))
+            let style = StrokeStyle(lineWidth: width, lineCap: .butt, lineJoin: .round)
+            if glow && settings.glow > 0 {
+                var halo = context
+                halo.addFilter(.blur(radius: (2 + 5 * level) * CGFloat(settings.glow / 100)))
+                halo.stroke(path, with: shading, style: StrokeStyle(lineWidth: width * 1.6, lineCap: .butt, lineJoin: .round))
+            }
+            context.stroke(path, with: shading, style: style)
         }
 
-        var edge = Path()
-        addSmooth(line, to: &edge, move: true)
-        strokeWithGlow(edge, in: &context, shading: tint(0.95 * reveal), width: 1.2 * th, reveal: reveal)
-        context.stroke(edge, with: .color(.white.opacity(0.55 * reveal)), lineWidth: 0.4 * th)
+        let parts: [([OutlinePoint], Axis)] = [(left, .vertical), (bottom, .horizontal), (right, .vertical)]
+        let body: (CGFloat) -> CGFloat = { v in (0.3 + 0.7 * v) * (0.55 + 0.45 * level) * fade }
+        // Wide faint body with the glow, then the crisp core, then a whisper of white where it's brightest.
+        for (part, axis) in parts { stroke(part, axis, width: 2.4 * th, glow: true) { v in body(v) * 0.3 * (0.4 + v) } }
+        for (part, axis) in parts { stroke(part, axis, width: 0.9 * th, alpha: body) }
+        if glassAmount > 0 {
+            for (part, axis) in parts { stroke(part, axis, width: 0.35 * th) { v in max(0, v - 0.4) * 1.3 * CGFloat(glassAmount) * fade } }
+        }
     }
 
     // MARK: - Shared helpers
@@ -540,17 +540,6 @@ struct NotchVisualizerView: View {
 
     private func gradient(alpha: Double) -> Gradient {
         Gradient(stops: palette.map { .init(color: Color(nsColor: $0.colour).opacity(alpha), location: $0.location) })
-    }
-
-    /// Bass colour in the middle, treble colour at both ends (for Wrap).
-    private func mirroredGradient(alpha: Double) -> Gradient {
-        var stops: [Gradient.Stop] = []
-        for (location, colour) in palette {
-            let c = Color(nsColor: colour).opacity(alpha)
-            stops.append(.init(color: c, location: 0.5 - location / 2))
-            if location > 0 { stops.append(.init(color: c, location: 0.5 + location / 2)) }
-        }
-        return Gradient(stops: stops.sorted { $0.location < $1.location })
     }
 
     private var glowColour: Color {

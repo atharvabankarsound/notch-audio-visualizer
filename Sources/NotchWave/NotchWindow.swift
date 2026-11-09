@@ -33,7 +33,8 @@ enum NotchLayout {
     static let maxWing: CGFloat = 160      // largest "Width" setting; the window is sized for it
     static let maxDrop: CGFloat = 10       // how far it grows below the notch
     static let ear: CGFloat = 6            // concave flare where the shape meets the screen edge
-    static let below: CGFloat = 26         // room under the notch for the Wrap waveform
+    static let below: CGFloat = 16         // room under the notch for glow
+    static let islandWing: CGFloat = 30    // how far the Island style extends each side
     static let padding: CGFloat = 4
 }
 

@@ -16,14 +16,14 @@ enum WaveStyle: String, CaseIterable, Identifiable {
 }
 
 enum WaveShape: String, CaseIterable, Identifiable {
-    case wrap, wave, bars, thread, dots
+    case island, halo, bars, thread, dots
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .wrap: return "Wrap"
-        case .wave: return "Wave"
+        case .island: return "Island"
+        case .halo: return "Halo"
         case .bars: return "Bars"
         case .thread: return "Thread"
         case .dots: return "Dots"
@@ -32,8 +32,8 @@ enum WaveShape: String, CaseIterable, Identifiable {
 
     var symbol: String {
         switch self {
-        case .wrap: return "rectangle.topthird.inset.filled"
-        case .wave: return "waveform.path"
+        case .island: return "capsule.fill"
+        case .halo: return "light.max"
         case .bars: return "chart.bar.fill"
         case .thread: return "scribble"
         case .dots: return "circle.grid.3x3.fill"
@@ -77,7 +77,7 @@ final class VisualizerSettings: ObservableObject {
         func number(_ key: String, _ fallback: Double) -> Double { d.object(forKey: key) == nil ? fallback : d.double(forKey: key) }
         func flag(_ key: String, _ fallback: Bool) -> Bool { d.object(forKey: key) == nil ? fallback : d.bool(forKey: key) }
 
-        shape = WaveShape(rawValue: d.string(forKey: "shape") ?? "") ?? .wrap
+        shape = WaveShape(rawValue: d.string(forKey: "shape") ?? "") ?? .island
         style = WaveStyle(rawValue: d.string(forKey: "style") ?? "") ?? .glass
         thickness = number("thickness", 1)
         height = number("height", 100)
@@ -92,7 +92,7 @@ final class VisualizerSettings: ObservableObject {
     }
 
     func resetToDefaults() {
-        shape = .wrap; style = .glass; thickness = 1; height = 100; width = 112; glass = 70; glow = 60
+        shape = .island; style = .glass; thickness = 1; height = 100; width = 112; glass = 70; glow = 60
         echoLines = true; lipWaveform = true; smoothing = 5; hold = 1.6; sensitivityDB = 0
     }
 
